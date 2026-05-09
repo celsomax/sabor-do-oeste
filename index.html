@@ -1379,6 +1379,72 @@ function deletarVenda(id) {
   salvar(); renderAll();
 }
 
+function editarVenda(id) {
+  const venda = dados.vendas.find(v => v.id === id);
+  if (!venda) return;
+
+  const lote = dados.lotes.find(l => l.id === venda.loteId);
+  if (!lote) return alert('Lote da venda nao encontrado.');
+
+  const data = prompt('Data da venda (AAAA-MM-DD)', venda.data || hoje());
+  if (data === null) return;
+
+  const qtdRaw = prompt('Quantidade vendida', String(venda.qtd || 1));
+  if (qtdRaw === null) return;
+  const qtd = parseInt(qtdRaw, 10);
+  if (!Number.isFinite(qtd) || qtd < 1) return alert('Quantidade invalida.');
+
+  const vendidasOutras = dados.vendas
+    .filter(v => v.loteId === venda.loteId && v.id !== venda.id)
+    .reduce((a, v) => a + v.qtd, 0);
+  const estoqueDisponivel = lote.unidades - vendidasOutras;
+  if (qtd > estoqueDisponivel) {
+    return alert(`Quantidade excede o estoque disponivel (${estoqueDisponivel}).`);
+  }
+
+  const precoRaw = prompt('Preco unitario (R$)', String(venda.preco || 0));
+  if (precoRaw === null) return;
+  const preco = Number(String(precoRaw).replace(',', '.'));
+  if (!Number.isFinite(preco) || preco <= 0) return alert('Preco invalido.');
+
+  const local = prompt('Canal/local da venda', venda.local || 'Direto');
+  if (local === null) return;
+  const pag = prompt('Forma de pagamento', venda.pag || 'Pix');
+  if (pag === null) return;
+  const obs = prompt('Observacoes', venda.obs || '');
+  if (obs === null) return;
+
+  const clienteAtual = venda.clienteId || 'avulso';
+  const clienteIdRaw = prompt('Cliente ID (use "avulso" para venda avulsa)', clienteAtual);
+  if (clienteIdRaw === null) return;
+  const clienteId = (clienteIdRaw || 'avulso').trim() || 'avulso';
+  const cliente = clienteId === 'avulso' ? null : dados.clientes.find(c => c.id === clienteId);
+  if (clienteId !== 'avulso' && !cliente) {
+    return alert('Cliente ID nao encontrado. Use um ID existente ou "avulso".');
+  }
+
+  venda.data = data;
+  venda.qtd = qtd;
+  venda.preco = preco;
+  venda.total = +(qtd * preco).toFixed(2);
+  venda.custo = +(((lote.custo / lote.unidades) * qtd) || 0).toFixed(2);
+  venda.lucro = +(venda.total - venda.custo).toFixed(2);
+  venda.local = local.trim() || 'Direto';
+  venda.pag = pag.trim() || 'Pix';
+  venda.obs = obs.trim();
+  venda.clienteId = clienteId;
+  venda.clienteNome = cliente ? cliente.nome : 'Avulso';
+  venda.produto = lote.produto;
+
+  const totalVendidasLote = dados.vendas.filter(v => v.loteId === lote.id).reduce((a, v) => a + v.qtd, 0);
+  lote.status = totalVendidasLote >= lote.unidades ? 'encerrado' : 'ativo';
+
+  salvar();
+  renderAll();
+  popularFiltroMes();
+  alert('Venda atualizada com sucesso!');
+}
+
 function deletarLote(id) {
   const temVenda = dados.vendas.some(v => v.loteId === id);
   if (temVenda) return alert('Este lote tem vendas registradas. Remova as vendas primeiro.');
@@ -1387,10 +1453,94 @@ function deletarLote(id) {
   salvar(); renderAll(); popularSelectLotes();
 }
 
+function editarLote(id) {
+  const lote = dados.lotes.find(l => l.id === id);
+  if (!lote) return;
+
+  const data = prompt('Data do lote (AAAA-MM-DD)', lote.data || hoje());
+  if (data === null) return;
+
+  const produtoRaw = prompt('Produto (salame ou linguica)', lote.produto || 'salame');
+  if (produtoRaw === null) return;
+  const produtoNormalizado = produtoRaw.trim().toLowerCase();
+  const produto = produtoNormalizado === 'linguica' ? 'linguica' : produtoNormalizado === 'salame' ? 'salame' : null;
+  if (!produto) return alert('Produto invalido. Use salame ou linguica.');
+
+  const vendidas = dados.vendas.filter(v => v.loteId === lote.id).reduce((a, v) => a + v.qtd, 0);
+  const unidadesRaw = prompt('Unidades produzidas no lote', String(lote.unidades || 0));
+  if (unidadesRaw === null) return;
+  const unidades = parseInt(unidadesRaw, 10);
+  if (!Number.isFinite(unidades) || unidades < vendidas) {
+    return alert(`Unidades invalidas. Deve ser >= ${vendidas} (ja vendidas).`);
+  }
+
+  const custoRaw = prompt('Custo total do lote (R$)', String(lote.custo || 0));
+  if (custoRaw === null) return;
+  const custo = Number(String(custoRaw).replace(',', '.'));
+  if (!Number.isFinite(custo) || custo <= 0) return alert('Custo invalido.');
+
+  const statusRaw = prompt('Status (ativo ou encerrado)', lote.status || 'ativo');
+  if (statusRaw === null) return;
+  const status = statusRaw.trim().toLowerCase();
+  if (status !== 'ativo' && status !== 'encerrado') return alert('Status invalido.');
+
+  lote.data = data;
+  lote.produto = produto;
+  lote.unidades = unidades;
+  lote.custo = +custo.toFixed(2);
+  lote.status = status;
+
+  dados.vendas.forEach(v => {
+    if (v.loteId === lote.id) {
+      v.produto = lote.produto;
+      v.custo = +(((lote.custo / lote.unidades) * v.qtd) || 0).toFixed(2);
+      v.lucro = +(v.total - v.custo).toFixed(2);
+    }
+  });
+
+  salvar();
+  renderAll();
+  alert('Lote atualizado com sucesso!');
+}
+
 function deletarCliente(id) {
   if (!confirm('Remover este cliente?')) return;
   dados.clientes = dados.clientes.filter(c => c.id !== id);
   salvar(); renderAll(); popularSelectClientes();
+}
+
+function editarCliente(id) {
+  const cliente = dados.clientes.find(c => c.id === id);
+  if (!cliente) return;
+
+  const nomeRaw = prompt('Nome do cliente', cliente.nome || '');
+  if (nomeRaw === null) return;
+  const nome = nomeRaw.trim();
+  if (!nome) return alert('Nome obrigatorio.');
+
+  const foneRaw = prompt('WhatsApp do cliente', cliente.fone || '');
+  if (foneRaw === null) return;
+
+  const tipoRaw = prompt('Tipo (Particular, Distribuidor, Parceiro)', cliente.tipo || 'Particular');
+  if (tipoRaw === null) return;
+  const tipo = tipoRaw.trim() || 'Particular';
+
+  const obsRaw = prompt('Observacoes', cliente.obs || '');
+  if (obsRaw === null) return;
+
+  cliente.nome = nome;
+  cliente.fone = foneRaw.trim();
+  cliente.tipo = tipo;
+  cliente.obs = obsRaw.trim();
+
+  dados.vendas.forEach(v => {
+    if (v.clienteId === cliente.id) v.clienteNome = cliente.nome;
+  });
+
+  salvar();
+  renderAll();
+  popularSelectClientes();
+  alert('Cliente atualizado com sucesso!');
 }
 
 // ===== POPULAR SELECTS =====
@@ -1579,7 +1729,12 @@ function renderTabLotes() {
       <td><span class="badge ${est > 0 ? 'badge-verde' : 'badge-red'}">${est}</span></td>
       <td>${moeda(l.custo)}</td>
       <td><span class="badge ${l.status === 'ativo' ? 'badge-verde' : 'badge-blue'}">${l.status === 'ativo' ? 'Em estoque' : 'Encerrado'}</span></td>
-      <td><button class="btn btn-danger btn-sm" onclick="deletarLote('${l.id}')">✕</button></td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost btn-sm" onclick="editarLote('${l.id}')">Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="deletarLote('${l.id}')">✕</button>
+        </div>
+      </td>
     </tr>`;
   }).join('');
   lista.reverse(); // Restore order
@@ -1600,7 +1755,12 @@ function renderTabVendas() {
     <td>${moeda(v.preco)}</td>
     <td style="color:var(--green);">${moeda(v.total)}</td>
     <td>${v.pag}</td>
-    <td><button class="btn btn-danger btn-sm" onclick="deletarVenda('${v.id}')">✕</button></td>
+    <td>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-ghost btn-sm" onclick="editarVenda('${v.id}')">Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="deletarVenda('${v.id}')">✕</button>
+      </div>
+    </td>
   </tr>`).join('');
 }
 
@@ -1614,12 +1774,17 @@ function renderTabClientes() {
     const ultimo = cv.length ? cv[cv.length-1].data : null;
     return `<tr>
       <td>${c.nome}</td>
-      <td><a href="https://wa.me/55${c.fone.replace(/\D/g,'')}" target="_blank" style="color:var(--green);text-decoration:none;">${c.fone || '—'}</a></td>
+      <td><a href="https://wa.me/55${(c.fone || '').replace(/\D/g,'')}" target="_blank" style="color:var(--green);text-decoration:none;">${c.fone || '—'}</a></td>
       <td><span class="badge badge-amber">${c.tipo}</span></td>
       <td>${cv.length}</td>
       <td style="color:var(--gold);">${moeda(total)}</td>
       <td>${formatData(ultimo)}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="deletarCliente('${c.id}')">✕</button></td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost btn-sm" onclick="editarCliente('${c.id}')">Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="deletarCliente('${c.id}')">✕</button>
+        </div>
+      </td>
     </tr>`;
   }).join('');
 }
