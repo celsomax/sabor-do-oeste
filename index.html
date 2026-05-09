@@ -903,10 +903,21 @@ let dados = JSON.parse(localStorage.getItem('salame_dados') || '{"lotes":[],"ven
 const API_BASE_STORAGE_KEY = 'salame_api_base_url';
 const AUTO_SYNC_ENABLED_KEY = 'salame_auto_sync_enabled';
 const THEME_STORAGE_KEY = 'salame_theme';
+const META_STORAGE_KEY = 'salame_meta';
 const AUTO_SYNC_INTERVAL_MS = 60000;
 let autoSyncTimer = null;
 let autoSyncInFlight = false;
 let autoSyncBootstrapped = false;
+let metaSync = JSON.parse(localStorage.getItem(META_STORAGE_KEY) || '{"localUpdatedAt":null,"lastCloudUpdatedAt":null}');
+
+function salvarMetaSync() {
+  localStorage.setItem(META_STORAGE_KEY, JSON.stringify(metaSync));
+}
+
+function toTs(value) {
+  const ts = value ? new Date(value).getTime() : 0;
+  return Number.isFinite(ts) ? ts : 0;
+}
 
 function aplicarTema(theme) {
   const tema = theme === 'italia-claro' ? 'italia-claro' : 'italia-escuro';
@@ -995,11 +1006,13 @@ function mergeArraysById(localArr, cloudArr) {
   return Array.from(map.values());
 }
 
-function mergeSnapshots(localSnapshot, cloudSnapshot) {
+function mergeSnapshots(localSnapshot, cloudSnapshot, prefer = 'cloud') {
+  const first = prefer === 'local' ? cloudSnapshot : localSnapshot;
+  const second = prefer === 'local' ? localSnapshot : cloudSnapshot;
   return {
-    lotes: mergeArraysById(localSnapshot?.lotes || [], cloudSnapshot?.lotes || []),
-    vendas: mergeArraysById(localSnapshot?.vendas || [], cloudSnapshot?.vendas || []),
-    clientes: mergeArraysById(localSnapshot?.clientes || [], cloudSnapshot?.clientes || [])
+    lotes: mergeArraysById(first?.lotes || [], second?.lotes || []),
+    vendas: mergeArraysById(first?.vendas || [], second?.vendas || []),
+    clientes: mergeArraysById(first?.clientes || [], second?.clientes || [])
   };
 }
 
@@ -1042,6 +1055,11 @@ async function sincronizarParaNuvemInterno({ silent = false, allowEmptyOverwrite
     if (!silent) {
       setIaStatus(`Sincronizacao concluida!\nLotes: ${payload.result.lotes}\nVendas: ${payload.result.vendas}\nClientes: ${payload.result.clientes}\nAtualizado em: ${payload.result.updatedAt}`, 'ok');
     }
+
+    metaSync.lastCloudUpdatedAt = payload?.result?.updatedAt || new Date().toISOString();
+    metaSync.localUpdatedAt = metaSync.lastCloudUpdatedAt;
+    salvarMetaSync();
+
     return { ok: true, payload };
   } catch (error) {
     if (!silent) {
@@ -1084,6 +1102,11 @@ async function carregarDaNuvemInterno({ silent = false } = {}) {
         'ok'
       );
     }
+
+    metaSync.lastCloudUpdatedAt = snapshot.updatedAt || new Date().toISOString();
+    metaSync.localUpdatedAt = metaSync.lastCloudUpdatedAt;
+    salvarMetaSync();
+
     return { ok: true, snapshot };
   } catch (error) {
     if (!silent) {
@@ -1120,7 +1143,10 @@ async function sincronizarAutomaticamenteSilencioso() {
       clientes: Array.isArray(dados?.clientes) ? dados.clientes : []
     };
 
-    const merged = mergeSnapshots(local, cloud);
+    const cloudTs = toTs(cloud?.updatedAt);
+    const localTs = Math.max(toTs(metaSync?.localUpdatedAt), toTs(metaSync?.lastCloudUpdatedAt));
+    const prefer = localTs >= cloudTs ? 'local' : 'cloud';
+    const merged = mergeSnapshots(local, cloud, prefer);
     const localStr = JSON.stringify(local);
     const mergedStr = JSON.stringify(merged);
 
@@ -1129,6 +1155,11 @@ async function sincronizarAutomaticamenteSilencioso() {
       salvar();
       renderAll();
       popularFiltroMes();
+      if (prefer === 'cloud') {
+        metaSync.localUpdatedAt = cloud?.updatedAt || new Date().toISOString();
+        metaSync.lastCloudUpdatedAt = cloud?.updatedAt || metaSync.lastCloudUpdatedAt;
+        salvarMetaSync();
+      }
     }
 
     const localCount = totalRegistros(local);
@@ -1197,6 +1228,8 @@ function qtdUnidades(kg, pesoGramas) {
 
 function salvar() {
   localStorage.setItem('salame_dados', JSON.stringify(dados));
+  metaSync.localUpdatedAt = new Date().toISOString();
+  salvarMetaSync();
   agendarAutoSync();
 }
 
