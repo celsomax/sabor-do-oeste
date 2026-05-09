@@ -7,28 +7,28 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;0,900;1,600&family=DM+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0e0a04;
-  --bg2: #1a1208;
-  --bg3: #241a0c;
-  --card: #1e1508;
-  --card2: #261d0e;
-  --border: rgba(200,169,110,0.15);
-  --border2: rgba(200,169,110,0.08);
-  --gold: #c8a96e;
-  --gold2: #e8c97e;
-  --gold3: rgba(200,169,110,0.1);
-  --brown: #8b5a28;
-  --text: #f0e6d0;
-  --text2: #b8a080;
-  --text3: #7a6040;
-  --green: #5daa7a;
-  --green2: rgba(93,170,122,0.15);
-  --red: #d06050;
-  --red2: rgba(208,96,80,0.15);
-  --blue: #6090c8;
-  --blue2: rgba(96,144,200,0.15);
-  --amber: #d4900a;
-  --amber2: rgba(212,144,10,0.15);
+  --bg: #132318;
+  --bg2: #1d3323;
+  --bg3: #2a1d16;
+  --card: #243628;
+  --card2: #33221a;
+  --border: rgba(244,233,207,0.2);
+  --border2: rgba(244,233,207,0.11);
+  --gold: #e8d6ad;
+  --gold2: #f4e9cf;
+  --gold3: rgba(232,214,173,0.14);
+  --brown: #8c2f25;
+  --text: #f8f2e3;
+  --text2: #d7c6a0;
+  --text3: #bba379;
+  --green: #2f7a45;
+  --green2: rgba(47,122,69,0.22);
+  --red: #c23b2d;
+  --red2: rgba(194,59,45,0.2);
+  --blue: #5c8f8d;
+  --blue2: rgba(92,143,141,0.17);
+  --amber: #d08a2f;
+  --amber2: rgba(208,138,47,0.2);
   --radius: 8px;
   --radius2: 12px;
 }
@@ -36,7 +36,7 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 
 body {
-  background: var(--bg);
+  background: radial-gradient(circle at 15% 10%, #1f3f2c 0%, var(--bg) 55%, #2f1d16 100%);
   color: var(--text);
   font-family: 'Lora', serif;
   min-height: 100vh;
@@ -56,7 +56,7 @@ body::before {
 
 /* ===== HEADER ===== */
 .header {
-  background: linear-gradient(135deg, #1a1208 0%, #241a0c 100%);
+  background: linear-gradient(135deg, #1e4c2d 0%, #1f3b2a 52%, #8c2f25 100%);
   border-bottom: 1px solid var(--border);
   padding: 0 24px;
   display: flex;
