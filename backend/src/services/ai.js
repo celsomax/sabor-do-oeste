@@ -13,6 +13,90 @@ function compactarDados(dados) {
   return JSON.stringify(seguro);
 }
 
+function asNumber(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function somarCampos(items, fields) {
+  return (items || []).reduce((acc, item) => {
+    for (const field of fields) {
+      const val = asNumber(item?.[field]);
+      if (val) return acc + val;
+    }
+    return acc;
+  }, 0);
+}
+
+function contarUltimosDias(vendas, dias = 30) {
+  const now = Date.now();
+  const janelaMs = dias * 24 * 60 * 60 * 1000;
+
+  return (vendas || []).filter((venda) => {
+    const dataBruta = venda?.data || venda?.createdAt || venda?.updatedAt;
+    if (!dataBruta) return false;
+    const ts = new Date(dataBruta).getTime();
+    return Number.isFinite(ts) && now - ts <= janelaMs;
+  }).length;
+}
+
+function analiseLocal({ perguntaUsuario, dados, erros }) {
+  const lotes = Array.isArray(dados?.lotes) ? dados.lotes : [];
+  const vendas = Array.isArray(dados?.vendas) ? dados.vendas : [];
+
+  const estoqueUnidades = somarCampos(lotes, [
+    'estoqueAtual',
+    'qtdEstoque',
+    'estoque',
+    'unidades',
+    'qtdUnidades',
+    'quantidade'
+  ]);
+  const kgEmProducao = somarCampos(lotes, ['kg', 'pesoKg', 'quantidadeKg']);
+  const vendas30d = contarUltimosDias(vendas, 30);
+  const faturamentoAprox = somarCampos(vendas, ['total', 'valor', 'valorTotal', 'precoTotal']);
+
+  const alertaEstoque =
+    estoqueUnidades > 0
+      ? estoqueUnidades < 10
+        ? `Estoque baixo: ${estoqueUnidades.toFixed(0)} unidades (abaixo do limite de 10).`
+        : `Estoque estimado em ${estoqueUnidades.toFixed(0)} unidades.`
+      : 'Nao foi possivel inferir estoque em unidades pelos campos recebidos.';
+
+  const risco =
+    estoqueUnidades > 0 && estoqueUnidades < 10
+      ? 'Risco alto de ruptura de estoque nos proximos dias.'
+      : 'Risco principal atual e dependencia de dados incompletos para previsao mais precisa.';
+
+  const compraSugeridaKg = Math.max(10, vendas30d * 1.2);
+  const tripaMetros = compraSugeridaKg / 0.55;
+
+  const resposta = [
+    '1) Diagnostico',
+    `${alertaEstoque} Kg em producao: ${kgEmProducao.toFixed(2)} kg. Vendas (30d): ${vendas30d}.`,
+    '',
+    '2) Risco imediato',
+    risco,
+    '',
+    '3) Acao recomendada',
+    `Planejar lote de ${compraSugeridaKg.toFixed(1)} kg para 30 dias e revisar cadastro de campos de estoque/unidades.`,
+    '',
+    '4) Estimativa numerica',
+    `Tripa sugerida: ${tripaMetros.toFixed(1)} metros. Faturamento aproximado no historico enviado: R$ ${faturamentoAprox.toFixed(2)}.`,
+    '',
+    '5) Proxima verificacao',
+    'Revalidar em 48h apos novas vendas e confirmar se estoque em unidades esta sendo gravado corretamente.',
+    '',
+    `Modo local sem custo ativado. Pergunta recebida: "${perguntaUsuario}".`
+  ].join('\n');
+
+  return {
+    provider: 'local',
+    resposta,
+    avisos: erros
+  };
+}
+
 async function callOpenAI(prompt) {
   if (!config.openaiApiKey) {
     throw new Error('OPENAI_API_KEY nao configurada.');
@@ -85,5 +169,5 @@ export async function analisarComIA({ perguntaUsuario, dados }) {
     }
   }
 
-  throw new Error(`Falha nos provedores de IA. ${erros.join(' | ')}`);
+  return analiseLocal({ perguntaUsuario: pergunta, dados: dados || {}, erros });
 }
