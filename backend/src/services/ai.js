@@ -37,12 +37,12 @@ async function callGemini(prompt) {
   }
 
   const endpoint = `https://generativelanguage.googleapis.com/v1/models/${config.geminiModel}:generateContent?key=${config.geminiApiKey}`;
+  const promptFinal = `${SYSTEM_PROMPT}\n\n${prompt}`;
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      contents: [{ role: 'user', parts: [{ text: promptFinal }] }],
       generationConfig: { temperature: 0.2 }
     })
   });
