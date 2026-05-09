@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sabor do Oeste · Gestão</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;0,900;1,600&family=DM+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0a04;
+  --bg2: #1a1208;
+  --bg3: #241a0c;
+  --card: #1e1508;
+  --card2: #261d0e;
+  --border: rgba(200,169,110,0.15);
+  --border2: rgba(200,169,110,0.08);
+  --gold: #c8a96e;
+  --gold2: #e8c97e;
+  --gold3: rgba(200,169,110,0.1);
+  --brown: #8b5a28;
+  --text: #f0e6d0;
+  --text2: #b8a080;
+  --text3: #7a6040;
+  --green: #5daa7a;
+  --green2: rgba(93,170,122,0.15);
+  --red: #d06050;
+  --red2: rgba(208,96,80,0.15);
+  --blue: #6090c8;
+  --blue2: rgba(96,144,200,0.15);
+  --amber: #d4900a;
+  --amber2: rgba(212,144,10,0.15);
+  --radius: 8px;
+  --radius2: 12px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Lora', serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Grain overlay */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:999;
+  opacity:0.4;
+}
+
+/* ===== HEADER ===== */
+.header {
+  background: linear-gradient(135deg, #1a1208 0%, #241a0c 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--brown);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.logo-texto {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--gold2);
+  line-height: 1;
+}
+
+.logo-sub {
+  font-size: 9px;
+  color: var(--text3);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  display: block;
+}
+
+.header-data {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text3);
+  letter-spacing: 0.08em;
+}
+
+/* ===== NAV ===== */
+.nav {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border2);
+  display: flex;
+  padding: 0 24px;
+  gap: 2px;
+  overflow-x: auto;
+}
+
+.nav-btn {
+  padding: 12px 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-btn:hover { color: var(--gold); }
+.nav-btn.ativo { color: var(--gold2); border-bottom-color: var(--gold); }
+
+/* ===== MAIN ===== */
+.main { padding: 24px; max-width: 1100px; margin: 0 auto; }
+
+.pagina { display: none; }
+.pagina.ativo { display: block; animation: fadeIn 0.2s ease; }
+
+@keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+
+/* ===== CARDS RESUMO ===== */
+.resumo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.resumo-card {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius2);
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.resumo-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.rc-verde::before { background: var(--green); }
+.rc-gold::before { background: var(--gold); }
+.rc-red::before { background: var(--red); }
+.rc-blue::before { background: var(--blue); }
+.rc-amber::before { background: var(--amber); }
+
+.resumo-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 6px;
+}
+
+.resumo-valor {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+}
+
+.resumo-sub {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 4px;
+  font-family: 'DM Mono', monospace;
+}
+
+/* ===== SEÇÕES ===== */
+.secao {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius2);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.secao-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.secao-titulo {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.secao-body { padding: 18px; }
+
+/* ===== FORM ===== */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+
+.form-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+
+.form-input, .form-select {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 12px;
+  color: var(--text);
+  font-family: 'Lora', serif;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.form-input:focus, .form-select:focus {
+  border-color: var(--gold);
+}
+
+.form-select option { background: var(--bg3); }
+
+/* ===== BOTÕES ===== */
+.btn {
+  padding: 9px 18px;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: var(--brown);
+  color: var(--text);
+}
+.btn-primary:hover { background: #a06830; }
+
+.btn-green {
+  background: var(--green);
+  color: #04281a;
+}
+.btn-green:hover { opacity:0.85; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+.btn-danger {
+  background: var(--red2);
+  color: var(--red);
+  border: 1px solid transparent;
+}
+.btn-danger:hover { background: var(--red); color: white; }
+
+.btn-sm { padding: 5px 10px; font-size: 9px; }
+
+/* ===== TABELA ===== */
+.tabela-wrap { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+thead th {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border2);
+}
+
+tbody tr {
+  border-bottom: 1px solid var(--border2);
+  transition: background 0.15s;
+}
+
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--card2); }
+
+tbody td {
+  padding: 10px 12px;
+  color: var(--text2);
+}
+
+tbody td:first-child { color: var(--text); }
+
+/* ===== BADGE ===== */
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.badge-verde { background: var(--green2); color: var(--green); }
+.badge-red { background: var(--red2); color: var(--red); }
+.badge-gold { background: var(--gold3); color: var(--gold); }
+.badge-blue { background: var(--blue2); color: var(--blue); }
+.badge-amber { background: var(--amber2); color: var(--amber); }
+
+/* ===== VAZIO ===== */
+.vazio {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text3);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+
+/* ===== DASHBOARD EXTRA ===== */
+.dash-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 600px) {
+  .dash-row { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+
+.lista-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border2);
+  font-size: 13px;
+}
+.lista-item:last-child { border-bottom: none; }
+.li-nome { color: var(--text); }
+.li-valor { color: var(--gold); font-family: 'DM Mono', monospace; font-size: 12px; }
+
+/* ===== ALERTA ===== */
+.alerta {
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 12px;
+  margin-bottom: 12px;
+  font-family: 'DM Mono', monospace;
+}
+.alerta-amber { background: var(--amber2); color: var(--amber); border: 1px solid rgba(212,144,10,0.3); }
+.alerta-green { background: var(--green2); color: var(--green); border: 1px solid rgba(93,170,122,0.3); }
+
+/* ===== PROGRESSO META ===== */
+.meta-bar-wrap {
+  background: var(--bg3);
+  border-radius: 4px;
+  height: 8px;
+  overflow: hidden;
+  margin: 8px 0 4px;
+}
+.meta-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--gold));
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.tabs-mini {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+.tab-mini {
+  padding: 5px 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+}
+.tab-mini.ativo { background: var(--gold3); color: var(--gold); border-color: var(--gold); }
+
+.divider { height: 1px; background: var(--border2); margin: 14px 0; }
+
+.highlight { color: var(--gold2); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">🥩</div>
+    <div>
+      <span class="logo-texto">Sabor do Oeste</span>
+      <span class="logo-sub">Gestão Artesanal</span>
+    </div>
+  </div>
+  <div class="header-data" id="header-data"></div>
+</header>
+
+<nav class="nav">
+  <button class="nav-btn ativo" onclick="irPara('dashboard', this)">📊 Dashboard</button>
+  <button class="nav-btn" onclick="irPara('lotes', this)">🏭 Lotes</button>
+  <button class="nav-btn" onclick="irPara('vendas', this)">💰 Vendas</button>
+  <button class="nav-btn" onclick="irPara('clientes', this)">👥 Clientes</button>
+  <button class="nav-btn" onclick="irPara('relatorio', this)">📈 Relatório</button>
+  <button class="nav-btn" onclick="irPara('estoque', this)">📦 Estoque</button>
+</nav>
+
+<main class="main">
+
+  <!-- ===== DASHBOARD ===== -->
+  <div id="dashboard" class="pagina ativo">
+    <div class="resumo-grid" id="dash-cards"></div>
+
+    <div id="dash-meta" style="margin-bottom:16px;"></div>
+
+    <div class="secao" style="margin-bottom:16px;">
+      <div class="secao-header">
+        <span class="secao-titulo">IA Cloud · Operacao</span>
+      </div>
+      <div class="secao-body">
+        <div class="form-grid" style="grid-template-columns: 1fr auto auto; align-items:end;">
+          <div class="form-group" style="grid-column:1 / -1;">
+            <label class="form-label">Pergunta para o agente</label>
+            <input class="form-input" id="ia-pergunta" type="text" placeholder="Ex: O que devo produzir nas proximas 2 semanas para manter margem alta?">
+          </div>
+          <div class="form-group" style="min-width:220px;">
+            <label class="form-label">API Base URL</label>
+            <input class="form-input" id="api-base-url" type="text" placeholder="http://localhost:8787">
+          </div>
+          <button class="btn btn-primary" onclick="salvarApiBaseUrl()">Salvar URL</button>
+          <button class="btn btn-green" onclick="consultarAgente()">Consultar IA</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+          <button class="btn btn-ghost" onclick="sincronizarParaNuvem()">Sincronizar dados no Firestore</button>
+        </div>
+        <div id="ia-resposta" style="margin-top:12px;"></div>
+      </div>
+    </div>
+
+    <div class="dash-row">
+      <div class="secao">
+        <div class="secao-header">
+          <span class="secao-titulo">Últimas Vendas</span>
+        </div>
+        <div class="secao-body" id="dash-ultimas-vendas"></div>
+      </div>
+      <div class="secao">
+        <div class="secao-header">
+          <span class="secao-titulo">Lotes em Produção</span>
+        </div>
+        <div class="secao-body" id="dash-lotes-ativos"></div>
+      </div>
+    </div>
+
+    <div class="dash-row">
+      <div class="secao">
+        <div class="secao-header">
+          <span class="secao-titulo">Top Clientes</span>
+        </div>
+        <div class="secao-body" id="dash-top-clientes"></div>
+      </div>
+      <div class="secao">
+        <div class="secao-header">
+          <span class="secao-titulo">Custos por Lote</span>
+        </div>
+        <div class="secao-body" id="dash-custos"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LOTES ===== -->
+  <div id="lotes" class="pagina">
+    <div class="secao" style="margin-bottom:16px;">
+      <div class="secao-header">
+        <span class="secao-titulo">Registrar Novo Lote</span>
+      </div>
+      <div class="secao-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Produto</label>
+            <select class="form-select" id="l-produto">
+              <option value="salame">Salame Artesanal</option>
+              <option value="linguica">Linguiça Artesanal</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Data de Produção</label>
+            <input class="form-input" type="date" id="l-data">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kg de Carne (padrão 10kg)</label>
+            <input class="form-input" type="number" id="l-kg" value="10" step="0.5" min="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Preço da Carne (R$/kg)</label>
+            <input class="form-input" type="number" id="l-preco-carne" value="17" step="0.5">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Peso médio por unidade (g)</label>
+            <input class="form-input" type="number" id="l-peso-un" value="180" step="5">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Preço de Venda (R$/un)</label>
+            <input class="form-input" type="number" id="l-preco-venda" value="12.50" step="0.5">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Observação</label>
+            <input class="form-input" type="text" id="l-obs" placeholder="Ex: lote especial, alho extra...">
+          </div>
+        </div>
+        <div id="l-preview" style="margin-bottom:12px;"></div>
+        <button class="btn btn-green" onclick="adicionarLote()">+ Registrar Lote</button>
+      </div>
+    </div>
+
+    <div class="secao">
+      <div class="secao-header">
+        <span class="secao-titulo">Todos os Lotes</span>
+        <div class="tabs-mini" style="margin-bottom:0;">
+          <button class="tab-mini ativo" onclick="filtrarLotes('todos', this)">Todos</button>
+          <button class="tab-mini" onclick="filtrarLotes('ativo', this)">Em estoque</button>
+          <button class="tab-mini" onclick="filtrarLotes('encerrado', this)">Encerrados</button>
+        </div>
+      </div>
+      <div class="secao-body">
+        <div class="tabela-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Produto</th>
+                <th>Data</th>
+                <th>Unidades</th>
+                <th>Vendidas</th>
+                <th>Estoque</th>
+                <th>Custo</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tabela-lotes"></tbody>
+          </table>
+          <div id="vazio-lotes" class="vazio" style="display:none;">Nenhum lote registrado ainda.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VENDAS ===== -->
+  <div id="vendas" class="pagina">
+    <div class="secao" style="margin-bottom:16px;">
+      <div class="secao-header">
+        <span class="secao-titulo">Registrar Venda</span>
+      </div>
+      <div class="secao-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Lote</label>
+            <select class="form-select" id="v-lote" onchange="atualizarPrecoVenda()">
+              <option value="">Selecione um lote...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cliente</label>
+            <select class="form-select" id="v-cliente">
+              <option value="avulso">— Venda Avulsa —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Quantidade (unidades)</label>
+            <input class="form-input" type="number" id="v-qtd" value="1" min="1" oninput="calcularTotal()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Preço Unit. (R$)</label>
+            <input class="form-input" type="number" id="v-preco" value="12.50" step="0.5" oninput="calcularTotal()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Data da Venda</label>
+            <input class="form-input" type="date" id="v-data">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Local / Canal</label>
+            <select class="form-select" id="v-local">
+              <option value="WhatsApp">WhatsApp</option>
+              <option value="Faculdade UCP">Faculdade UCP</option>
+              <option value="Fastão Pneus">Fastão Pneus</option>
+              <option value="Feira">Feira</option>
+              <option value="Restaurante">Restaurante</option>
+              <option value="Bar/Conveniência">Bar/Conveniência</option>
+              <option value="PJC">Pedro Juan Caballero</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Forma de Pagamento</label>
+            <select class="form-select" id="v-pag">
+              <option value="Pix">Pix</option>
+              <option value="Dinheiro">Dinheiro</option>
+              <option value="Cartão">Cartão</option>
+              <option value="Fiado">Fiado</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Observação</label>
+            <input class="form-input" type="text" id="v-obs" placeholder="Opcional...">
+          </div>
+        </div>
+        <div id="v-total" style="margin-bottom:12px;"></div>
+        <button class="btn btn-green" onclick="adicionarVenda()">+ Registrar Venda</button>
+      </div>
+    </div>
+
+    <div class="secao">
+      <div class="secao-header">
+        <span class="secao-titulo">Histórico de Vendas</span>
+        <select class="form-select" id="filtro-mes" style="width:140px;font-size:11px;padding:5px 8px;" onchange="renderTabVendas()">
+          <option value="todos">Todos os meses</option>
+        </select>
+      </div>
+      <div class="secao-body">
+        <div class="tabela-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Produto / Lote</th>
+                <th>Cliente</th>
+                <th>Local</th>
+                <th>Qtd</th>
+                <th>Unit.</th>
+                <th>Total</th>
+                <th>Pgto</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tabela-vendas"></tbody>
+          </table>
+          <div id="vazio-vendas" class="vazio" style="display:none;">Nenhuma venda registrada ainda.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CLIENTES ===== -->
+  <div id="clientes" class="pagina">
+    <div class="secao" style="margin-bottom:16px;">
+      <div class="secao-header">
+        <span class="secao-titulo">Cadastrar Cliente</span>
+      </div>
+      <div class="secao-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Nome</label>
+            <input class="form-input" type="text" id="c-nome" placeholder="Nome do cliente">
+          </div>
+          <div class="form-group">
+            <label class="form-label">WhatsApp</label>
+            <input class="form-input" type="text" id="c-fone" placeholder="(67) 9 9999-9999">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tipo</label>
+            <select class="form-select" id="c-tipo">
+              <option value="Particular">Particular</option>
+              <option value="Restaurante">Restaurante</option>
+              <option value="Bar/Conveniência">Bar/Conveniência</option>
+              <option value="Faculdade">Faculdade UCP</option>
+              <option value="Feira">Feira</option>
+              <option value="PJC">Pedro Juan Caballero</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Observação</label>
+            <input class="form-input" type="text" id="c-obs" placeholder="Ex: paga fiado, pede todo sábado...">
+          </div>
+        </div>
+        <button class="btn btn-green" onclick="adicionarCliente()">+ Cadastrar Cliente</button>
+      </div>
+    </div>
+
+    <div class="secao">
+      <div class="secao-header">
+        <span class="secao-titulo">Clientes Cadastrados</span>
+      </div>
+      <div class="secao-body">
+        <div class="tabela-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>WhatsApp</th>
+                <th>Tipo</th>
+                <th>Compras</th>
+                <th>Total Gasto</th>
+                <th>Último Pedido</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tabela-clientes"></tbody>
+          </table>
+          <div id="vazio-clientes" class="vazio" style="display:none;">Nenhum cliente cadastrado ainda.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== RELATÓRIO ===== -->
+  <div id="relatorio" class="pagina">
+    <div class="resumo-grid" id="rel-cards"></div>
+    <div class="dash-row">
+      <div class="secao">
+        <div class="secao-header"><span class="secao-titulo">Por Canal de Venda</span></div>
+        <div class="secao-body" id="rel-canais"></div>
+      </div>
+      <div class="secao">
+        <div class="secao-header"><span class="secao-titulo">Por Mês</span></div>
+        <div class="secao-body" id="rel-meses"></div>
+      </div>
+    </div>
+    <div class="dash-row">
+      <div class="secao">
+        <div class="secao-header"><span class="secao-titulo">Por Produto</span></div>
+        <div class="secao-body" id="rel-produto"></div>
+      </div>
+      <div class="secao">
+        <div class="secao-header"><span class="secao-titulo">Forma de Pagamento</span></div>
+        <div class="secao-body" id="rel-pgto"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ESTOQUE ===== -->
+  <div id="estoque" class="pagina">
+    <div class="resumo-grid" id="est-cards"></div>
+    <div class="secao">
+      <div class="secao-header"><span class="secao-titulo">Estoque Atual por Lote</span></div>
+      <div class="secao-body">
+        <div class="tabela-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Lote</th>
+                <th>Produto</th>
+                <th>Produzido</th>
+                <th>Vendido</th>
+                <th>Em Estoque</th>
+                <th>% Vendido</th>
+                <th>Receita Potencial</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-estoque"></tbody>
+          </table>
+          <div id="vazio-estoque" class="vazio" style="display:none;">Nenhum lote em estoque.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ========== DADOS ==========
+let dados = JSON.parse(localStorage.getItem('salame_dados') || '{"lotes":[],"vendas":[],"clientes":[]}');
+const API_BASE_STORAGE_KEY = 'salame_api_base_url';
+
+function defaultApiBaseUrl() {
+  const host = window.location.hostname;
+  if (host === 'localhost' || host === '127.0.0.1') {
+    return 'http://localhost:8787';
+  }
+  return '';
+}
+
+let apiBaseUrl = localStorage.getItem(API_BASE_STORAGE_KEY) || defaultApiBaseUrl();
+
+function getApiUrl(path) {
+  if (!apiBaseUrl) {
+    throw new Error('Defina a URL base da API no painel IA Cloud antes de usar esta funcao.');
+  }
+  return apiBaseUrl.replace(/\/$/, '') + path;
+}
+
+function salvarApiBaseUrl() {
+  const input = document.getElementById('api-base-url');
+  const valor = (input.value || '').trim();
+  if (!valor) return alert('Informe a URL base da API.');
+  apiBaseUrl = valor;
+  localStorage.setItem(API_BASE_STORAGE_KEY, apiBaseUrl);
+  alert('URL da API salva!');
+}
+
+function setIaStatus(html, tipo = 'neutro') {
+  const box = document.getElementById('ia-resposta');
+  if (!box) return;
+  const cores = {
+    neutro: 'var(--blue)',
+    erro: 'var(--red)',
+    ok: 'var(--green)'
+  };
+  box.innerHTML = `
+    <div style="background:var(--bg3);border:1px solid var(--border);border-left:3px solid ${cores[tipo] || cores.neutro};border-radius:var(--radius);padding:12px 14px;white-space:pre-wrap;line-height:1.45;color:var(--text2);">${html}</div>
+  `;
+}
+
+async function sincronizarParaNuvem() {
+  setIaStatus('Sincronizando snapshot local para o Firestore...', 'neutro');
+  try {
+    const response = await fetch(getApiUrl('/api/sync/import-local'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dados })
+    });
+    const payload = await response.json();
+    if (!response.ok || !payload.ok) {
+      throw new Error(payload.error || 'Falha na sincronizacao.');
+    }
+    setIaStatus(`Sincronizacao concluida!\nLotes: ${payload.result.lotes}\nVendas: ${payload.result.vendas}\nClientes: ${payload.result.clientes}\nAtualizado em: ${payload.result.updatedAt}`, 'ok');
+  } catch (error) {
+    setIaStatus(`Erro ao sincronizar: ${error.message}`, 'erro');
+  }
+}
+
+async function consultarAgente() {
+  const pergunta = (document.getElementById('ia-pergunta')?.value || '').trim();
+  if (!pergunta) return alert('Digite uma pergunta para o agente.');
+
+  setIaStatus('Consultando agente de IA...', 'neutro');
+  try {
+    const response = await fetch(getApiUrl('/api/ai/analisar'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        perguntaUsuario: pergunta,
+        dados
+      })
+    });
+    const payload = await response.json();
+    if (!response.ok || !payload.ok) {
+      throw new Error(payload.error || 'Falha ao consultar IA.');
+    }
+    setIaStatus(`Provedor: ${payload.provider}\n\n${payload.resposta}`, 'ok');
+  } catch (error) {
+    setIaStatus(`Erro na consulta IA: ${error.message}`, 'erro');
+  }
+}
+
+// Custo fixo por kg
+function custoPorLote(kg, precoCarne) {
+  const carne = kg * precoCarne;
+  const tempero = (0.35 / 10) * kg * (68 / 5 / 1.01); // ~4.75/lote de 10kg
+  const alho = (0.1 / 10) * kg * 15; // 15/kg alho
+  const tripa = 0.6 * 40 * (kg / 10); // 60% de 30m a R$40
+  return +(carne + tempero + alho + tripa).toFixed(2);
+}
+
+function qtdUnidades(kg, pesoGramas) {
+  return Math.floor((kg * 1000) / pesoGramas);
+}
+
+function salvar() {
+  localStorage.setItem('salame_dados', JSON.stringify(dados));
+}
+
+function moeda(v) {
+  return 'R$ ' + (+v).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function hoje() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function formatData(d) {
+  if (!d) return '—';
+  const p = d.split('-');
+  return p[2] + '/' + p[1] + '/' + p[0];
+}
+
+function mesLabel(d) {
+  if (!d) return '?';
+  const p = d.split('-');
+  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  return meses[parseInt(p[1])-1] + '/' + p[0].slice(2);
+}
+
+// ===== NAV =====
+function irPara(pag, btn) {
+  document.querySelectorAll('.pagina').forEach(p => p.classList.remove('ativo'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('ativo'));
+  document.getElementById(pag).classList.add('ativo');
+  if (btn) btn.classList.add('ativo');
+  renderAll();
+}
+
+// ===== PREVIEW LOTE =====
+document.addEventListener('DOMContentLoaded', () => {
+  const apiInput = document.getElementById('api-base-url');
+  if (apiInput) apiInput.value = apiBaseUrl;
+  document.getElementById('l-data').value = hoje();
+  document.getElementById('v-data').value = hoje();
+  atualizarPreviewLote();
+  ['l-kg','l-preco-carne','l-peso-un','l-preco-venda'].forEach(id => {
+    document.getElementById(id).addEventListener('input', atualizarPreviewLote);
+  });
+  document.getElementById('header-data').textContent = new Date().toLocaleDateString('pt-BR', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+  renderAll();
+  calcularTotal();
+  popularFiltroMes();
+});
+
+function atualizarPreviewLote() {
+  const kg = +document.getElementById('l-kg').value || 10;
+  const preco = +document.getElementById('l-preco-carne').value || 17;
+  const peso = +document.getElementById('l-peso-un').value || 180;
+  const precoVenda = +document.getElementById('l-preco-venda').value || 12.5;
+  const custo = custoPorLote(kg, preco);
+  const qtd = qtdUnidades(kg, peso);
+  const receita = qtd * precoVenda;
+  const lucro = receita - custo;
+  const margem = receita > 0 ? ((lucro/receita)*100).toFixed(0) : 0;
+  document.getElementById('l-preview').innerHTML = `
+    <div style="display:flex;gap:12px;flex-wrap:wrap;background:var(--bg3);border-radius:var(--radius);padding:12px 14px;border:1px solid var(--border2);">
+      <div><span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;display:block;">Unidades</span><span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:var(--text);">${qtd}</span></div>
+      <div><span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;display:block;">Custo Total</span><span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:var(--red);">${moeda(custo)}</span></div>
+      <div><span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;display:block;">Receita Potencial</span><span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:var(--blue);">${moeda(receita)}</span></div>
+      <div><span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;display:block;">Lucro Potencial</span><span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:var(--green);">${moeda(lucro)}</span></div>
+      <div><span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;display:block;">Margem</span><span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:var(--gold);">${margem}%</span></div>
+    </div>`;
+}
+
+// ===== ADICIONAR LOTE =====
+function adicionarLote() {
+  const produto = document.getElementById('l-produto').value;
+  const data = document.getElementById('l-data').value;
+  const kg = +document.getElementById('l-kg').value;
+  const precoCarne = +document.getElementById('l-preco-carne').value;
+  const pesoUn = +document.getElementById('l-peso-un').value;
+  const precoVenda = +document.getElementById('l-preco-venda').value;
+  const obs = document.getElementById('l-obs').value;
+  if (!data || !kg || !precoCarne) return alert('Preencha data, kg e preço da carne!');
+  const id = 'L' + String(dados.lotes.length + 1).padStart(3, '0');
+  const custo = custoPorLote(kg, precoCarne);
+  const unidades = qtdUnidades(kg, pesoUn);
+  dados.lotes.push({ id, produto, data, kg, precoCarne, pesoUn, precoVenda, obs, custo, unidades, status: 'ativo' });
+  salvar();
+  renderAll();
+  popularSelectLotes();
+  popularFiltroMes();
+  document.getElementById('l-obs').value = '';
+  alert('Lote ' + id + ' registrado com ' + unidades + ' unidades!');
+}
+
+// ===== ADICIONAR VENDA =====
+function atualizarPrecoVenda() {
+  const loteId = document.getElementById('v-lote').value;
+  const lote = dados.lotes.find(l => l.id === loteId);
+  if (lote) document.getElementById('v-preco').value = lote.precoVenda;
+  calcularTotal();
+}
+
+function calcularTotal() {
+  const qtd = +document.getElementById('v-qtd').value || 0;
+  const preco = +document.getElementById('v-preco').value || 0;
+  const total = qtd * preco;
+  document.getElementById('v-total').innerHTML = total > 0 ? `
+    <div style="background:var(--green2);border:1px solid rgba(93,170,122,0.3);border-radius:var(--radius);padding:10px 14px;font-family:'DM Mono',monospace;font-size:12px;color:var(--green);">
+      Total da venda: <strong style="font-size:16px;">${moeda(total)}</strong> (${qtd} un × ${moeda(preco)})
+    </div>` : '';
+}
+
+function adicionarVenda() {
+  const loteId = document.getElementById('v-lote').value;
+  const clienteId = document.getElementById('v-cliente').value;
+  const qtd = +document.getElementById('v-qtd').value;
+  const preco = +document.getElementById('v-preco').value;
+  const data = document.getElementById('v-data').value;
+  const local = document.getElementById('v-local').value;
+  const pag = document.getElementById('v-pag').value;
+  const obs = document.getElementById('v-obs').value;
+  if (!loteId) return alert('Selecione um lote!');
+  if (!qtd || qtd < 1) return alert('Informe a quantidade!');
+  const lote = dados.lotes.find(l => l.id === loteId);
+  if (!lote) return;
+  const vendidas = dados.vendas.filter(v => v.loteId === loteId).reduce((a, v) => a + v.qtd, 0);
+  const estoque = lote.unidades - vendidas;
+  if (qtd > estoque) return alert(`Estoque insuficiente! Disponível: ${estoque} unidades.`);
+  const cliente = dados.clientes.find(c => c.id === clienteId);
+  const total = qtd * preco;
+  const custo = (lote.custo / lote.unidades) * qtd;
+  const lucro = total - custo;
+  dados.vendas.push({
+    id: 'V' + String(dados.vendas.length + 1).padStart(4, '0'),
+    loteId, clienteId, clienteNome: cliente ? cliente.nome : 'Avulso',
+    produto: lote.produto, qtd, preco, total, custo, lucro, data, local, pag, obs
+  });
+  salvar();
+  // Verificar se lote esgotou
+  const totalVendidas = dados.vendas.filter(v => v.loteId === loteId).reduce((a, v) => a + v.qtd, 0);
+  if (totalVendidas >= lote.unidades) {
+    lote.status = 'encerrado';
+    salvar();
+  }
+  renderAll();
+  popularFiltroMes();
+  document.getElementById('v-qtd').value = 1;
+  document.getElementById('v-obs').value = '';
+  calcularTotal();
+  alert(`Venda registrada! ${moeda(total)} — Lucro: ${moeda(lucro)}`);
+}
+
+// ===== ADICIONAR CLIENTE =====
+function adicionarCliente() {
+  const nome = document.getElementById('c-nome').value.trim();
+  const fone = document.getElementById('c-fone').value.trim();
+  const tipo = document.getElementById('c-tipo').value;
+  const obs = document.getElementById('c-obs').value.trim();
+  if (!nome) return alert('Informe o nome do cliente!');
+  const id = 'C' + String(dados.clientes.length + 1).padStart(3, '0');
+  dados.clientes.push({ id, nome, fone, tipo, obs });
+  salvar();
+  renderAll();
+  popularSelectClientes();
+  document.getElementById('c-nome').value = '';
+  document.getElementById('c-fone').value = '';
+  document.getElementById('c-obs').value = '';
+  alert('Cliente ' + nome + ' cadastrado!');
+}
+
+// ===== DELETAR =====
+function deletarVenda(id) {
+  if (!confirm('Remover esta venda?')) return;
+  const venda = dados.vendas.find(v => v.id === id);
+  dados.vendas = dados.vendas.filter(v => v.id !== id);
+  // Reativar lote se estava encerrado
+  if (venda) {
+    const lote = dados.lotes.find(l => l.id === venda.loteId);
+    if (lote && lote.status === 'encerrado') { lote.status = 'ativo'; }
+  }
+  salvar(); renderAll();
+}
+
+function deletarLote(id) {
+  const temVenda = dados.vendas.some(v => v.loteId === id);
+  if (temVenda) return alert('Este lote tem vendas registradas. Remova as vendas primeiro.');
+  if (!confirm('Remover este lote?')) return;
+  dados.lotes = dados.lotes.filter(l => l.id !== id);
+  salvar(); renderAll(); popularSelectLotes();
+}
+
+function deletarCliente(id) {
+  if (!confirm('Remover este cliente?')) return;
+  dados.clientes = dados.clientes.filter(c => c.id !== id);
+  salvar(); renderAll(); popularSelectClientes();
+}
+
+// ===== POPULAR SELECTS =====
+function popularSelectLotes() {
+  const sel = document.getElementById('v-lote');
+  const val = sel.value;
+  sel.innerHTML = '<option value="">Selecione um lote...</option>';
+  dados.lotes.filter(l => l.status === 'ativo').forEach(l => {
+    const vendidas = dados.vendas.filter(v => v.loteId === l.id).reduce((a, v) => a + v.qtd, 0);
+    const est = l.unidades - vendidas;
+    sel.innerHTML += `<option value="${l.id}">${l.id} · ${l.produto === 'salame' ? 'Salame' : 'Linguiça'} · ${est} un · ${formatData(l.data)}</option>`;
+  });
+  if (val) sel.value = val;
+}
+
+function popularSelectClientes() {
+  const sel = document.getElementById('v-cliente');
+  const val = sel.value;
+  sel.innerHTML = '<option value="avulso">— Venda Avulsa —</option>';
+  dados.clientes.forEach(c => {
+    sel.innerHTML += `<option value="${c.id}">${c.nome} (${c.tipo})</option>`;
+  });
+  if (val) sel.value = val;
+}
+
+function popularFiltroMes() {
+  const sel = document.getElementById('filtro-mes');
+  const val = sel.value;
+  const meses = [...new Set(dados.vendas.map(v => v.data ? v.data.slice(0,7) : null).filter(Boolean))].sort().reverse();
+  sel.innerHTML = '<option value="todos">Todos os meses</option>';
+  meses.forEach(m => {
+    const p = m.split('-');
+    const meses2 = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    sel.innerHTML += `<option value="${m}">${meses2[parseInt(p[1])-1]}/${p[0]}</option>`;
+  });
+  if (val) sel.value = val;
+}
+
+// ===== FILTROS LOTES =====
+let filtroLote = 'todos';
+function filtrarLotes(f, btn) {
+  filtroLote = f;
+  document.querySelectorAll('#lotes .tab-mini').forEach(b => b.classList.remove('ativo'));
+  if (btn) btn.classList.add('ativo');
+  renderTabLotes();
+}
+
+// ===== RENDER ALL =====
+function renderAll() {
+  popularSelectLotes();
+  popularSelectClientes();
+  renderDashboard();
+  renderTabLotes();
+  renderTabVendas();
+  renderTabClientes();
+  renderRelatorio();
+  renderEstoque();
+}
+
+// ===== DASHBOARD =====
+function renderDashboard() {
+  const mesAtual = new Date().toISOString().slice(0,7);
+  const vendasMes = dados.vendas.filter(v => v.data && v.data.startsWith(mesAtual));
+  const receitaMes = vendasMes.reduce((a, v) => a + v.total, 0);
+  const lucroMes = vendasMes.reduce((a, v) => a + v.lucro, 0);
+  const totalReceita = dados.vendas.reduce((a, v) => a + v.total, 0);
+  const totalLucro = dados.vendas.reduce((a, v) => a + v.lucro, 0);
+  const unidadesMes = vendasMes.reduce((a, v) => a + v.qtd, 0);
+  const lotesAtivos = dados.lotes.filter(l => l.status === 'ativo').length;
+  const estoqueTotal = dados.lotes.filter(l => l.status === 'ativo').reduce((a, l) => {
+    const v = dados.vendas.filter(x => x.loteId === l.id).reduce((s, x) => s + x.qtd, 0);
+    return a + (l.unidades - v);
+  }, 0);
+  const META = 10000;
+  const pctMeta = Math.min((lucroMes / META) * 100, 100);
+
+  document.getElementById('dash-cards').innerHTML = `
+    <div class="resumo-card rc-gold">
+      <div class="resumo-label">Receita (mês)</div>
+      <div class="resumo-valor">${moeda(receitaMes)}</div>
+      <div class="resumo-sub">${unidadesMes} unidades vendidas</div>
+    </div>
+    <div class="resumo-card rc-verde">
+      <div class="resumo-label">Lucro (mês)</div>
+      <div class="resumo-valor">${moeda(lucroMes)}</div>
+      <div class="resumo-sub">margem ${receitaMes > 0 ? ((lucroMes/receitaMes)*100).toFixed(0) : 0}%</div>
+    </div>
+    <div class="resumo-card rc-blue">
+      <div class="resumo-label">Receita Total</div>
+      <div class="resumo-valor">${moeda(totalReceita)}</div>
+      <div class="resumo-sub">lucro total: ${moeda(totalLucro)}</div>
+    </div>
+    <div class="resumo-card rc-amber">
+      <div class="resumo-label">Em Estoque</div>
+      <div class="resumo-valor">${estoqueTotal}</div>
+      <div class="resumo-sub">${lotesAtivos} lote(s) ativo(s)</div>
+    </div>
+    <div class="resumo-card rc-red">
+      <div class="resumo-label">Clientes</div>
+      <div class="resumo-valor">${dados.clientes.length}</div>
+      <div class="resumo-sub">cadastrados</div>
+    </div>
+  `;
+
+  document.getElementById('dash-meta').innerHTML = `
+    <div class="secao">
+      <div class="secao-header"><span class="secao-titulo">Meta Mensal — R$ 10.000 de Lucro</span></div>
+      <div class="secao-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="font-size:13px;color:var(--text2);">Progresso: <strong style="color:var(--gold2);">${moeda(lucroMes)}</strong> de <strong style="color:var(--text);">${moeda(META)}</strong></span>
+          <span style="font-family:'DM Mono',monospace;font-size:13px;color:${pctMeta >= 100 ? 'var(--green)' : 'var(--gold)'};">${pctMeta.toFixed(1)}%</span>
+        </div>
+        <div class="meta-bar-wrap"><div class="meta-bar" style="width:${pctMeta}%;"></div></div>
+        <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:4px;">
+          ${pctMeta >= 100 ? '🎉 Meta atingida este mês!' : `Faltam ${moeda(META - lucroMes)} para a meta · ainda ${Math.ceil((META - lucroMes) / 8.5)} unidades a ~R$12,50 e custo ~R$4/un`}
+        </div>
+      </div>
+    </div>`;
+
+  // Últimas vendas
+  const ultimas = [...dados.vendas].reverse().slice(0, 5);
+  document.getElementById('dash-ultimas-vendas').innerHTML = ultimas.length ? ultimas.map(v => `
+    <div class="lista-item">
+      <div>
+        <div class="li-nome">${v.clienteNome} · ${v.local}</div>
+        <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">${formatData(v.data)} · ${v.qtd}un · ${v.produto === 'salame' ? 'Salame' : 'Linguiça'}</div>
+      </div>
+      <div class="li-valor">${moeda(v.total)}</div>
+    </div>`).join('') : '<div class="vazio">Sem vendas ainda.</div>';
+
+  // Lotes ativos
+  const lotesAtv = dados.lotes.filter(l => l.status === 'ativo');
+  document.getElementById('dash-lotes-ativos').innerHTML = lotesAtv.length ? lotesAtv.map(l => {
+    const v = dados.vendas.filter(x => x.loteId === l.id).reduce((a, x) => a + x.qtd, 0);
+    const est = l.unidades - v;
+    const pct = l.unidades > 0 ? (v / l.unidades * 100).toFixed(0) : 0;
+    return `<div class="lista-item">
+      <div>
+        <div class="li-nome">${l.id} · ${l.produto === 'salame' ? 'Salame' : 'Linguiça'}</div>
+        <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">${formatData(l.data)} · ${est} un restantes (${pct}% vendido)</div>
+      </div>
+      <span class="badge badge-verde">${est} un</span>
+    </div>`;
+  }).join('') : '<div class="vazio">Nenhum lote ativo.</div>';
+
+  // Top clientes
+  const topClientes = dados.clientes.map(c => {
+    const cv = dados.vendas.filter(v => v.clienteId === c.id);
+    return { nome: c.nome, tipo: c.tipo, total: cv.reduce((a, v) => a + v.total, 0), qtd: cv.reduce((a, v) => a + v.qtd, 0) };
+  }).sort((a, b) => b.total - a.total).slice(0, 5);
+  document.getElementById('dash-top-clientes').innerHTML = topClientes.length ? topClientes.map(c => `
+    <div class="lista-item">
+      <div>
+        <div class="li-nome">${c.nome}</div>
+        <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">${c.tipo} · ${c.qtd} unidades</div>
+      </div>
+      <div class="li-valor">${moeda(c.total)}</div>
+    </div>`).join('') : '<div class="vazio">Sem clientes ainda.</div>';
+
+  // Custos
+  const custoTotalLotes = dados.lotes.reduce((a, l) => a + l.custo, 0);
+  const totalLotes = dados.lotes.length;
+  document.getElementById('dash-custos').innerHTML = `
+    <div class="lista-item"><div class="li-nome">Total de Lotes</div><div class="li-valor">${totalLotes}</div></div>
+    <div class="lista-item"><div class="li-nome">Custo Total Insumos</div><div class="li-valor">${moeda(custoTotalLotes)}</div></div>
+    <div class="lista-item"><div class="li-nome">Custo Médio/Lote</div><div class="li-valor">${totalLotes ? moeda(custoTotalLotes/totalLotes) : '—'}</div></div>
+    <div class="lista-item"><div class="li-nome">Lucro Total Geral</div><div class="li-valor" style="color:var(--green);">${moeda(totalLucro)}</div></div>
+    <div class="lista-item"><div class="li-nome">Vendas Totais</div><div class="li-valor">${dados.vendas.reduce((a,v)=>a+v.qtd,0)} unidades</div></div>
+  `;
+}
+
+// ===== TAB LOTES =====
+function renderTabLotes() {
+  const lista = dados.lotes.filter(l => filtroLote === 'todos' || l.status === filtroLote);
+  const tbody = document.getElementById('tabela-lotes');
+  document.getElementById('vazio-lotes').style.display = lista.length ? 'none' : 'block';
+  tbody.innerHTML = lista.reverse().map(l => {
+    const vendidas = dados.vendas.filter(v => v.loteId === l.id).reduce((a, v) => a + v.qtd, 0);
+    const est = l.unidades - vendidas;
+    return `<tr>
+      <td><span class="badge badge-gold">${l.id}</span></td>
+      <td>${l.produto === 'salame' ? '🥩 Salame' : '🌭 Linguiça'}</td>
+      <td>${formatData(l.data)}</td>
+      <td>${l.unidades}</td>
+      <td>${vendidas}</td>
+      <td><span class="badge ${est > 0 ? 'badge-verde' : 'badge-red'}">${est}</span></td>
+      <td>${moeda(l.custo)}</td>
+      <td><span class="badge ${l.status === 'ativo' ? 'badge-verde' : 'badge-blue'}">${l.status === 'ativo' ? 'Em estoque' : 'Encerrado'}</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="deletarLote('${l.id}')">✕</button></td>
+    </tr>`;
+  }).join('');
+  lista.reverse(); // Restore order
+}
+
+// ===== TAB VENDAS =====
+function renderTabVendas() {
+  const filtroMes = document.getElementById('filtro-mes').value;
+  const lista = dados.vendas.filter(v => filtroMes === 'todos' || (v.data && v.data.startsWith(filtroMes)));
+  const tbody = document.getElementById('tabela-vendas');
+  document.getElementById('vazio-vendas').style.display = lista.length ? 'none' : 'block';
+  tbody.innerHTML = [...lista].reverse().map(v => `<tr>
+    <td>${formatData(v.data)}</td>
+    <td><span class="badge badge-gold">${v.loteId}</span> ${v.produto === 'salame' ? 'Salame' : 'Linguiça'}</td>
+    <td>${v.clienteNome}</td>
+    <td><span class="badge badge-blue">${v.local}</span></td>
+    <td>${v.qtd}</td>
+    <td>${moeda(v.preco)}</td>
+    <td style="color:var(--green);">${moeda(v.total)}</td>
+    <td>${v.pag}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="deletarVenda('${v.id}')">✕</button></td>
+  </tr>`).join('');
+}
+
+// ===== TAB CLIENTES =====
+function renderTabClientes() {
+  const tbody = document.getElementById('tabela-clientes');
+  document.getElementById('vazio-clientes').style.display = dados.clientes.length ? 'none' : 'block';
+  tbody.innerHTML = dados.clientes.map(c => {
+    const cv = dados.vendas.filter(v => v.clienteId === c.id);
+    const total = cv.reduce((a, v) => a + v.total, 0);
+    const ultimo = cv.length ? cv[cv.length-1].data : null;
+    return `<tr>
+      <td>${c.nome}</td>
+      <td><a href="https://wa.me/55${c.fone.replace(/\D/g,'')}" target="_blank" style="color:var(--green);text-decoration:none;">${c.fone || '—'}</a></td>
+      <td><span class="badge badge-amber">${c.tipo}</span></td>
+      <td>${cv.length}</td>
+      <td style="color:var(--gold);">${moeda(total)}</td>
+      <td>${formatData(ultimo)}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deletarCliente('${c.id}')">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ===== RELATÓRIO =====
+function renderRelatorio() {
+  const receita = dados.vendas.reduce((a, v) => a + v.total, 0);
+  const lucro = dados.vendas.reduce((a, v) => a + v.lucro, 0);
+  const custo = dados.vendas.reduce((a, v) => a + v.custo, 0);
+  const qtd = dados.vendas.reduce((a, v) => a + v.qtd, 0);
+  const margem = receita > 0 ? (lucro/receita*100).toFixed(1) : 0;
+
+  document.getElementById('rel-cards').innerHTML = `
+    <div class="resumo-card rc-gold"><div class="resumo-label">Receita Total</div><div class="resumo-valor">${moeda(receita)}</div><div class="resumo-sub">${qtd} unidades</div></div>
+    <div class="resumo-card rc-verde"><div class="resumo-label">Lucro Total</div><div class="resumo-valor">${moeda(lucro)}</div><div class="resumo-sub">margem ${margem}%</div></div>
+    <div class="resumo-card rc-red"><div class="resumo-label">Custo Total</div><div class="resumo-valor">${moeda(custo)}</div><div class="resumo-sub">insumos</div></div>
+    <div class="resumo-card rc-blue"><div class="resumo-label">Ticket Médio</div><div class="resumo-valor">${dados.vendas.length ? moeda(receita/dados.vendas.length) : moeda(0)}</div><div class="resumo-sub">${dados.vendas.length} vendas</div></div>
+  `;
+
+  // Por canal
+  const canais = {};
+  dados.vendas.forEach(v => {
+    if (!canais[v.local]) canais[v.local] = { total: 0, qtd: 0 };
+    canais[v.local].total += v.total;
+    canais[v.local].qtd += v.qtd;
+  });
+  const canaisSorted = Object.entries(canais).sort((a,b) => b[1].total - a[1].total);
+  document.getElementById('rel-canais').innerHTML = canaisSorted.length ? canaisSorted.map(([canal, d]) => `
+    <div class="lista-item">
+      <div><div class="li-nome">${canal}</div><div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">${d.qtd} unidades</div></div>
+      <div class="li-valor">${moeda(d.total)}</div>
+    </div>`).join('') : '<div class="vazio">Sem dados.</div>';
+
+  // Por mês
+  const meses = {};
+  dados.vendas.forEach(v => {
+    const m = v.data ? v.data.slice(0,7) : 'desconhecido';
+    if (!meses[m]) meses[m] = { total: 0, lucro: 0, qtd: 0 };
+    meses[m].total += v.total;
+    meses[m].lucro += v.lucro;
+    meses[m].qtd += v.qtd;
+  });
+  const mesesSorted = Object.entries(meses).sort((a,b) => b[0].localeCompare(a[0]));
+  document.getElementById('rel-meses').innerHTML = mesesSorted.length ? mesesSorted.map(([mes, d]) => `
+    <div class="lista-item">
+      <div><div class="li-nome">${mesLabel(mes + '-01')}</div><div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">${d.qtd} un · lucro ${moeda(d.lucro)}</div></div>
+      <div class="li-valor">${moeda(d.total)}</div>
+    </div>`).join('') : '<div class="vazio">Sem dados.</div>';
+
+  // Por produto
+  const prods = { salame: { total:0, lucro:0, qtd:0 }, linguica: { total:0, lucro:0, qtd:0 } };
+  dados.vendas.forEach(v => {
+    const p = v.produto === 'salame' ? 'salame' : 'linguica';
+    prods[p].total += v.total; prods[p].lucro += v.lucro; prods[p].qtd += v.qtd;
+  });
+  document.getElementById('rel-produto').innerHTML = `
+    <div class="lista-item"><div><div class="li-nome">🥩 Salame Artesanal</div><div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">${prods.salame.qtd} unidades</div></div><div class="li-valor">${moeda(prods.salame.total)}</div></div>
+    <div class="lista-item"><div><div class="li-nome">🌭 Linguiça Artesanal</div><div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">${prods.linguica.qtd} unidades</div></div><div class="li-valor">${moeda(prods.linguica.total)}</div></div>
+  `;
+
+  // Por pagamento
+  const pgtos = {};
+  dados.vendas.forEach(v => {
+    if (!pgtos[v.pag]) pgtos[v.pag] = { total:0, qtd:0 };
+    pgtos[v.pag].total += v.total; pgtos[v.pag].qtd += v.qtd;
+  });
+  document.getElementById('rel-pgto').innerHTML = Object.entries(pgtos).length ? Object.entries(pgtos).sort((a,b)=>b[1].total-a[1].total).map(([p,d]) => `
+    <div class="lista-item"><div class="li-nome">${p}</div><div class="li-valor">${moeda(d.total)}</div></div>`).join('') : '<div class="vazio">Sem dados.</div>';
+}
+
+// ===== ESTOQUE =====
+function renderEstoque() {
+  const lotesAtv = dados.lotes.filter(l => l.status === 'ativo');
+  const estoqueTotal = lotesAtv.reduce((a, l) => {
+    const v = dados.vendas.filter(x => x.loteId === l.id).reduce((s, x) => s + x.qtd, 0);
+    return a + (l.unidades - v);
+  }, 0);
+  const valorEstoque = dados.lotes.reduce((a, l) => {
+    const v = dados.vendas.filter(x => x.loteId === l.id).reduce((s, x) => s + x.qtd, 0);
+    const est = l.unidades - v;
+    return a + est * l.precoVenda;
+  }, 0);
+
+  document.getElementById('est-cards').innerHTML = `
+    <div class="resumo-card rc-verde"><div class="resumo-label">Total em Estoque</div><div class="resumo-valor">${estoqueTotal}</div><div class="resumo-sub">unidades</div></div>
+    <div class="resumo-card rc-gold"><div class="resumo-label">Valor do Estoque</div><div class="resumo-valor">${moeda(valorEstoque)}</div><div class="resumo-sub">receita potencial</div></div>
+    <div class="resumo-card rc-blue"><div class="resumo-label">Lotes Ativos</div><div class="resumo-valor">${lotesAtv.length}</div><div class="resumo-sub">em produção/estoque</div></div>
+  `;
+
+  const tbody = document.getElementById('tabela-estoque');
+  document.getElementById('vazio-estoque').style.display = dados.lotes.length ? 'none' : 'block';
+  tbody.innerHTML = dados.lotes.map(l => {
+    const v = dados.vendas.filter(x => x.loteId === l.id).reduce((a, x) => a + x.qtd, 0);
+    const est = l.unidades - v;
+    const pct = l.unidades > 0 ? (v / l.unidades * 100).toFixed(0) : 0;
+    const potencial = est * l.precoVenda;
+    return `<tr>
+      <td><span class="badge badge-gold">${l.id}</span></td>
+      <td>${l.produto === 'salame' ? '🥩 Salame' : '🌭 Linguiça'}</td>
+      <td>${l.unidades}</td>
+      <td>${v}</td>
+      <td><span class="badge ${est > 5 ? 'badge-verde' : est > 0 ? 'badge-amber' : 'badge-red'}">${est}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="flex:1;background:var(--bg3);border-radius:2px;height:6px;overflow:hidden;">
+            <div style="width:${pct}%;height:100%;background:var(--green);border-radius:2px;"></div>
+          </div>
+          <span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">${pct}%</span>
+        </div>
+      </td>
+      <td style="color:var(--gold);">${moeda(potencial)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// Inicializar
+renderAll();
+</script>
+</body>
+</html>
