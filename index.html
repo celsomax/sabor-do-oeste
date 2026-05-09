@@ -162,7 +162,8 @@ body[data-theme='italia-claro'] .header {
 
 /* ===== NAV ===== */
 .nav {
-  background: var(--bg2);
+  background: color-mix(in srgb, var(--bg2) 86%, #000 14%);
+  border-top: 1px solid var(--border2);
   border-bottom: 1px solid var(--border2);
   display: flex;
   padding: 0 24px;
@@ -189,7 +190,11 @@ body[data-theme='italia-claro'] .header {
 }
 
 .nav-btn:hover { color: var(--gold); }
-.nav-btn.ativo { color: var(--gold2); border-bottom-color: var(--gold); }
+.nav-btn.ativo {
+  color: var(--gold2);
+  border-bottom-color: var(--gold);
+  background: linear-gradient(180deg, transparent 0%, var(--gold3) 120%);
+}
 
 /* ===== MAIN ===== */
 .main { padding: 24px; max-width: 1100px; margin: 0 auto; }
@@ -208,12 +213,14 @@ body[data-theme='italia-claro'] .header {
 }
 
 .resumo-card {
-  background: var(--card);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--card) 88%, #fff 12%) 0%, var(--card) 100%);
   border: 1px solid var(--border2);
   border-radius: var(--radius2);
   padding: 16px 18px;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
 }
 
 .resumo-card::before {
@@ -221,6 +228,16 @@ body[data-theme='italia-claro'] .header {
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 2px;
+}
+
+.resumo-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+  border-radius: var(--radius2);
+  pointer-events: none;
+  opacity: 0.35;
 }
 
 .rc-verde::before { background: var(--green); }
@@ -255,11 +272,12 @@ body[data-theme='italia-claro'] .header {
 
 /* ===== SEÇÕES ===== */
 .secao {
-  background: var(--card);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card) 90%, #fff 10%) 0%, var(--card) 100%);
   border: 1px solid var(--border2);
   border-radius: var(--radius2);
   margin-bottom: 16px;
   overflow: hidden;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.17);
 }
 
 .secao-header {
@@ -268,14 +286,16 @@ body[data-theme='italia-claro'] .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--gold3) 55%, transparent) 0%, transparent 75%);
 }
 
 .secao-titulo {
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.2em;
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--gold);
+  font-weight: 700;
 }
 
 .secao-body { padding: 18px; }
@@ -320,7 +340,7 @@ body[data-theme='italia-claro'] .header {
 /* ===== BOTÕES ===== */
 .btn {
   padding: 9px 18px;
-  border-radius: var(--radius);
+  border-radius: 999px;
   border: none;
   cursor: pointer;
   font-family: 'DM Mono', monospace;
@@ -331,30 +351,30 @@ body[data-theme='italia-claro'] .header {
 }
 
 .btn-primary {
-  background: var(--brown);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--brown) 90%, #fff 10%) 0%, var(--brown) 100%);
   color: var(--text);
 }
-.btn-primary:hover { background: #a06830; }
+.btn-primary:hover { filter: brightness(1.06); transform: translateY(-1px); }
 
 .btn-green {
-  background: var(--green);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 84%, #fff 16%) 0%, var(--green) 100%);
   color: #04281a;
 }
-.btn-green:hover { opacity:0.85; }
+.btn-green:hover { filter: brightness(1.06); transform: translateY(-1px); }
 
 .btn-ghost {
-  background: transparent;
+  background: color-mix(in srgb, var(--bg3) 55%, transparent);
   color: var(--text2);
   border: 1px solid var(--border);
 }
-.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); background: var(--gold3); }
 
 .btn-danger {
   background: var(--red2);
   color: var(--red);
   border: 1px solid transparent;
 }
-.btn-danger:hover { background: var(--red); color: white; }
+.btn-danger:hover { background: var(--red); color: white; transform: translateY(-1px); }
 
 .btn-sm { padding: 5px 10px; font-size: 9px; }
 
@@ -368,7 +388,7 @@ table {
 }
 
 thead th {
-  font-family: 'DM Mono', monospace;
+  font-family: 'Playfair Display', serif;
   font-size: 9px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -397,7 +417,7 @@ tbody td:first-child { color: var(--text); }
 .badge {
   display: inline-block;
   padding: 3px 8px;
-  border-radius: 4px;
+  border-radius: 999px;
   font-family: 'DM Mono', monospace;
   font-size: 9px;
   letter-spacing: 0.08em;
