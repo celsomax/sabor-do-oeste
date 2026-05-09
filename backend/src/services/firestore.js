@@ -60,3 +60,25 @@ export async function importSnapshotFromLocal(payload) {
     updatedAt: now
   };
 }
+
+export async function exportSnapshotFromCloud() {
+  const firestore = getFirestore();
+  const doc = await firestore.collection('sabor_do_oeste').doc('snapshot').get();
+
+  if (!doc.exists) {
+    return {
+      lotes: [],
+      vendas: [],
+      clientes: [],
+      updatedAt: null
+    };
+  }
+
+  const data = doc.data() || {};
+  return {
+    lotes: Array.isArray(data.lotes) ? data.lotes : [],
+    vendas: Array.isArray(data.vendas) ? data.vendas : [],
+    clientes: Array.isArray(data.clientes) ? data.clientes : [],
+    updatedAt: data.updatedAt || null
+  };
+}

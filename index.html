@@ -494,6 +494,7 @@ tbody td:first-child { color: var(--text); }
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
           <button class="btn btn-ghost" onclick="sincronizarParaNuvem()">Sincronizar dados no Firestore</button>
+          <button class="btn btn-ghost" onclick="carregarDaNuvem()">Carregar dados da nuvem neste dispositivo</button>
         </div>
         <div id="ia-resposta" style="margin-top:12px;"></div>
       </div>
@@ -864,6 +865,19 @@ function setIaStatus(html, tipo = 'neutro') {
 }
 
 async function sincronizarParaNuvem() {
+  const totalLocal =
+    (Array.isArray(dados?.lotes) ? dados.lotes.length : 0) +
+    (Array.isArray(dados?.vendas) ? dados.vendas.length : 0) +
+    (Array.isArray(dados?.clientes) ? dados.clientes.length : 0);
+
+  if (!totalLocal) {
+    const ok = confirm('Este dispositivo esta sem dados locais. Se continuar, pode sobrescrever a nuvem com vazio. Deseja continuar?');
+    if (!ok) {
+      setIaStatus('Sincronizacao cancelada para evitar sobrescrever a nuvem com dados vazios.', 'neutro');
+      return;
+    }
+  }
+
   setIaStatus('Sincronizando snapshot local para o Firestore...', 'neutro');
   try {
     const response = await fetch(getApiUrl('/api/sync/import-local'), {
@@ -878,6 +892,35 @@ async function sincronizarParaNuvem() {
     setIaStatus(`Sincronizacao concluida!\nLotes: ${payload.result.lotes}\nVendas: ${payload.result.vendas}\nClientes: ${payload.result.clientes}\nAtualizado em: ${payload.result.updatedAt}`, 'ok');
   } catch (error) {
     setIaStatus(`Erro ao sincronizar: ${error.message}`, 'erro');
+  }
+}
+
+async function carregarDaNuvem() {
+  setIaStatus('Baixando snapshot do Firestore para este dispositivo...', 'neutro');
+  try {
+    const response = await fetch(getApiUrl('/api/sync/export-cloud'));
+    const payload = await response.json();
+    if (!response.ok || !payload.ok) {
+      throw new Error(payload.error || 'Falha ao carregar dados da nuvem.');
+    }
+
+    const snapshot = payload.result || {};
+    dados = {
+      lotes: Array.isArray(snapshot.lotes) ? snapshot.lotes : [],
+      vendas: Array.isArray(snapshot.vendas) ? snapshot.vendas : [],
+      clientes: Array.isArray(snapshot.clientes) ? snapshot.clientes : []
+    };
+
+    salvar();
+    renderAll();
+    popularFiltroMes();
+
+    setIaStatus(
+      `Dados carregados da nuvem com sucesso!\nLotes: ${dados.lotes.length}\nVendas: ${dados.vendas.length}\nClientes: ${dados.clientes.length}\nAtualizado em: ${snapshot.updatedAt || '—'}`,
+      'ok'
+    );
+  } catch (error) {
+    setIaStatus(`Erro ao carregar da nuvem: ${error.message}`, 'erro');
   }
 }
 

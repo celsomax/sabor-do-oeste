@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { config } from './config.js';
 import { analisarComIA } from './services/ai.js';
-import { importSnapshotFromLocal } from './services/firestore.js';
+import { exportSnapshotFromCloud, importSnapshotFromLocal } from './services/firestore.js';
 
 const app = express();
 
@@ -41,6 +41,15 @@ app.get('/health', (_req, res) => {
 app.post('/api/sync/import-local', async (req, res) => {
   try {
     const result = await importSnapshotFromLocal(req.body?.dados || {});
+    res.json({ ok: true, result });
+  } catch (error) {
+    res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+app.get('/api/sync/export-cloud', async (_req, res) => {
+  try {
+    const result = await exportSnapshotFromCloud();
     res.json({ ok: true, result });
   } catch (error) {
     res.status(500).json({ ok: false, error: error.message });
