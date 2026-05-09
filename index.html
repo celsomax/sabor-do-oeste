@@ -829,7 +829,7 @@ function defaultApiBaseUrl() {
   if (host === 'localhost' || host === '127.0.0.1') {
     return 'http://localhost:8787';
   }
-  return '';
+  return 'https://sabor-do-oeste-backend-production.up.railway.app';
 }
 
 let apiBaseUrl = localStorage.getItem(API_BASE_STORAGE_KEY) || defaultApiBaseUrl();
