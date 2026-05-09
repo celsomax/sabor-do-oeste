@@ -33,6 +33,31 @@
   --radius2: 12px;
 }
 
+body[data-theme='italia-claro'] {
+  --bg: #f4eee0;
+  --bg2: #efe4cc;
+  --bg3: #f8f3e8;
+  --card: #fffaf0;
+  --card2: #f2e7cf;
+  --border: rgba(122, 84, 36, 0.22);
+  --border2: rgba(122, 84, 36, 0.13);
+  --gold: #8b5d24;
+  --gold2: #6f451a;
+  --gold3: rgba(139, 93, 36, 0.12);
+  --brown: #9c3124;
+  --text: #2e2417;
+  --text2: #5a4630;
+  --text3: #7a5f42;
+  --green: #2e6d3f;
+  --green2: rgba(46, 109, 63, 0.16);
+  --red: #a8372b;
+  --red2: rgba(168, 55, 43, 0.14);
+  --blue: #446d86;
+  --blue2: rgba(68, 109, 134, 0.12);
+  --amber: #9a6a2d;
+  --amber2: rgba(154, 106, 45, 0.15);
+}
+
 * { margin:0; padding:0; box-sizing:border-box; }
 
 body {
@@ -41,6 +66,10 @@ body {
   font-family: 'Lora', serif;
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+body[data-theme='italia-claro'] {
+  background: radial-gradient(circle at 10% 8%, #f7efdd 0%, var(--bg) 52%, #e8dbc1 100%);
 }
 
 /* Grain overlay */
@@ -66,6 +95,10 @@ body::before {
   position: sticky;
   top: 0;
   z-index: 100;
+}
+
+body[data-theme='italia-claro'] .header {
+  background: linear-gradient(135deg, #d7e5d6 0%, #f3e8d3 52%, #e3cbc6 100%);
 }
 
 .logo {
@@ -107,6 +140,24 @@ body::before {
   font-size: 11px;
   color: var(--text3);
   letter-spacing: 0.08em;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.theme-select {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text2);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  padding: 6px 8px;
+  text-transform: uppercase;
 }
 
 /* ===== NAV ===== */
@@ -455,7 +506,13 @@ tbody td:first-child { color: var(--text); }
       <span class="logo-sub">Gestão Artesanal</span>
     </div>
   </div>
-  <div class="header-data" id="header-data"></div>
+  <div class="header-right">
+    <select id="theme-picker" class="theme-select" title="Tema visual">
+      <option value="italia-escuro">Italia Escuro</option>
+      <option value="italia-claro">Italia Claro</option>
+    </select>
+    <div class="header-data" id="header-data"></div>
+  </div>
 </header>
 
 <nav class="nav">
@@ -825,10 +882,28 @@ tbody td:first-child { color: var(--text); }
 let dados = JSON.parse(localStorage.getItem('salame_dados') || '{"lotes":[],"vendas":[],"clientes":[]}');
 const API_BASE_STORAGE_KEY = 'salame_api_base_url';
 const AUTO_SYNC_ENABLED_KEY = 'salame_auto_sync_enabled';
+const THEME_STORAGE_KEY = 'salame_theme';
 const AUTO_SYNC_INTERVAL_MS = 60000;
 let autoSyncTimer = null;
 let autoSyncInFlight = false;
 let autoSyncBootstrapped = false;
+
+function aplicarTema(theme) {
+  const tema = theme === 'italia-claro' ? 'italia-claro' : 'italia-escuro';
+  document.body.setAttribute('data-theme', tema);
+  localStorage.setItem(THEME_STORAGE_KEY, tema);
+}
+
+function inicializarTema() {
+  const salvo = localStorage.getItem(THEME_STORAGE_KEY) || 'italia-escuro';
+  aplicarTema(salvo);
+  const picker = document.getElementById('theme-picker');
+  if (!picker) return;
+  picker.value = salvo;
+  picker.addEventListener('change', (event) => {
+    aplicarTema(event.target.value);
+  });
+}
 
 function defaultApiBaseUrl() {
   const host = window.location.hostname;
@@ -1137,6 +1212,7 @@ function irPara(pag, btn) {
 
 // ===== PREVIEW LOTE =====
 document.addEventListener('DOMContentLoaded', () => {
+  inicializarTema();
   const apiInput = document.getElementById('api-base-url');
   if (apiInput) apiInput.value = apiBaseUrl;
   document.getElementById('l-data').value = hoje();
