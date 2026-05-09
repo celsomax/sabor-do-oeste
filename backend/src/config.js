@@ -15,6 +15,14 @@ function asOrigins(value) {
     .filter(Boolean);
 }
 
+function asBoolean(value, fallback = false) {
+  if (value === undefined || value === null || value === '') return fallback;
+  const normalizado = String(value).trim().toLowerCase();
+  if (['1', 'true', 'yes', 'y', 'on'].includes(normalizado)) return true;
+  if (['0', 'false', 'no', 'n', 'off'].includes(normalizado)) return false;
+  return fallback;
+}
+
 export const config = {
   port: asNumber(process.env.PORT, 8787),
   nodeEnv: process.env.NODE_ENV || 'development',
@@ -28,6 +36,7 @@ export const config = {
     .split(',')
     .map((p) => p.trim().toLowerCase())
     .filter(Boolean),
+  enableExternalAi: asBoolean(process.env.ENABLE_EXTERNAL_AI, false),
   openaiApiKey: process.env.OPENAI_API_KEY || '',
   openaiModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
   geminiApiKey: process.env.GEMINI_API_KEY || '',

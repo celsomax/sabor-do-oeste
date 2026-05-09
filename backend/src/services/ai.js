@@ -147,6 +147,10 @@ export async function analisarComIA({ perguntaUsuario, dados }) {
     throw new Error('Pergunta obrigatoria.');
   }
 
+  if (!config.enableExternalAi) {
+    return analiseLocal({ perguntaUsuario: pergunta, dados: dados || {}, erros: ['Provedores externos desabilitados (ENABLE_EXTERNAL_AI=false).'] });
+  }
+
   const contexto = compactarDados(dados || {});
   const prompt = `Dados atuais do negocio (JSON): ${contexto}\n\nPergunta: ${pergunta}\n\nResponda em 5 blocos:\n1) Diagnostico\n2) Risco imediato\n3) Acao recomendada\n4) Estimativa numerica\n5) Proxima verificacao`; 
 
