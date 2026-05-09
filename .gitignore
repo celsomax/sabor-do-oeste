@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+
+# Environment variables (never commit secrets)
+.env
+backend/.env
+frontend/.env
+
+# Build outputs
+dist/
+build/
+.cache/
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Vercel
+.vercel/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
