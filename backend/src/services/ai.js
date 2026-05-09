@@ -36,7 +36,7 @@ async function callGemini(prompt) {
     throw new Error('GEMINI_API_KEY nao configurada.');
   }
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent?key=${config.geminiApiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1/models/${config.geminiModel}:generateContent?key=${config.geminiApiKey}`;
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
