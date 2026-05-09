@@ -124,17 +124,25 @@ Com base nesses dados, forneça:
 
 // -----------------------------------------------------------------------
 // POST /api/ai/chat
+// Accepts a free-form question (max 1000 characters) plus optional context.
 // -----------------------------------------------------------------------
 router.post('/chat', async (req, res, next) => {
   try {
     const { question, lotes = [], vendas = [], compras = [], estoques = [] } = req.body;
 
+    const MAX_QUESTION_LENGTH = 1000;
+
     if (!question || typeof question !== 'string' || question.trim().length === 0) {
       return res.status(400).json({ error: 'Campo "question" é obrigatório.' });
     }
 
-    // Limit question length to prevent abuse
-    const sanitizedQuestion = question.trim().slice(0, 1000);
+    if (question.trim().length > MAX_QUESTION_LENGTH) {
+      return res.status(400).json({
+        error: `A pergunta deve ter no máximo ${MAX_QUESTION_LENGTH} caracteres. Enviado: ${question.trim().length}.`
+      });
+    }
+
+    const sanitizedQuestion = question.trim();
 
     const contextMsg = `
 ## Contexto do Sistema

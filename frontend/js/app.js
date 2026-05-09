@@ -504,10 +504,12 @@ async function runAIAnalysis(endpoint, extraPayload = {}) {
     const data = await res.json();
 
     provider.textContent = data.provider ? `via ${data.provider}` : '';
+    response.style.color = '';
     response.textContent = data.response || data.message || JSON.stringify(data, null, 2);
   } catch (err) {
     console.error('Erro ao chamar backend IA:', err);
-    response.innerHTML = `<span style="color:var(--color-danger)">Erro: ${err.message}. Verifique se o backend está rodando em ${backendUrl}.</span>`;
+    response.textContent = `Erro: ${err.message}. Verifique se o backend está rodando em ${backendUrl}.`;
+    response.style.color = 'var(--color-danger)';
   } finally {
     loading.classList.add('hidden');
   }

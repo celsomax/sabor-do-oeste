@@ -73,9 +73,14 @@ export function setSyncStatus(state, label) {
   const el  = document.getElementById('syncStatus');
   const dot = el.querySelector('.dot');
   dot.className = `dot ${state}`;
-  el.querySelector('span:last-child')
-    ? (el.lastChild.textContent = ' ' + label)
-    : el.appendChild(Object.assign(document.createTextNode(' ' + label)));
+  // The sync-status div contains: <span class="dot …"></span> text
+  // Update the text node directly to avoid innerHTML usage
+  let textNode = Array.from(el.childNodes).find(n => n.nodeType === Node.TEXT_NODE);
+  if (textNode) {
+    textNode.textContent = ' ' + label;
+  } else {
+    el.appendChild(document.createTextNode(' ' + label));
+  }
 }
 
 // -----------------------------------------------------------------------

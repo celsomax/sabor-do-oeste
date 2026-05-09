@@ -131,6 +131,15 @@ describe('POST /api/ai/chat – input validation', () => {
     assert.strictEqual(res.status, 400);
     assert.ok(res.body.error);
   });
+
+  it('should return 400 when question exceeds 1000 characters', async () => {
+    const res = await request
+      .post('/api/ai/chat')
+      .send({ question: 'a'.repeat(1001), lotes: [], vendas: [], compras: [] });
+
+    assert.strictEqual(res.status, 400);
+    assert.ok(res.body.error && res.body.error.includes('1000'));
+  });
 });
 
 // -----------------------------------------------------------------------

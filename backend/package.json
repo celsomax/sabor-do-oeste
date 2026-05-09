@@ -1,7 +1,7 @@
 {
   "name": "sabor-do-oeste-backend",
   "version": "1.0.0",
-  "description": "Backend Node.js para o Sabor do Oeste – API de IA e analise operacional",
+  "description": "Backend Node.js para o Sabor do Oeste – API de IA e analise operacional de charcutaria",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
