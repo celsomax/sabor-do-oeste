@@ -1,0 +1,45 @@
+// Firestore Security Rules for Sabor do Oeste
+// Deploy with: firebase deploy --only firestore:rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: check if request is authenticated (future auth support)
+    // For initial deployment without auth, restrict to read/write from
+    // known origins by keeping API keys confidential and using server-side
+    // access via Firebase Admin SDK in the backend.
+
+    // Lotes (production batches)
+    match /lotes/{loteId} {
+      allow read:  if true;
+      allow write: if request.resource.data.keys().hasAll(['produto', 'kgCarne', 'precoCarne', 'custoTotal', 'dataProducao'])
+                   && request.resource.data.kgCarne is number
+                   && request.resource.data.kgCarne > 0
+                   && request.resource.data.custoTotal is number;
+    }
+
+    // Vendas (sales)
+    match /vendas/{vendaId} {
+      allow read:  if true;
+      allow write: if request.resource.data.keys().hasAll(['loteId', 'unidades', 'precoUnit', 'data'])
+                   && request.resource.data.unidades is number
+                   && request.resource.data.unidades > 0
+                   && request.resource.data.precoUnit is number
+                   && request.resource.data.precoUnit > 0;
+    }
+
+    // Compras (raw material purchases)
+    match /compras/{compraId} {
+      allow read:  if true;
+      allow write: if request.resource.data.keys().hasAll(['item', 'qtd', 'custoTotal', 'data'])
+                   && request.resource.data.qtd is number
+                   && request.resource.data.qtd > 0;
+    }
+
+    // Deny all other collections by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

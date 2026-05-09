@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sabor do Oeste – Gestão de Charcutaria</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- Firebase SDK (modular v10) via CDN -->
+  <script type="module" src="js/firebase-config.js"></script>
+</head>
+<body>
+  <!-- ===== Header ===== -->
+  <header class="site-header">
+    <div class="header-inner">
+      <h1>🥩 Sabor do Oeste</h1>
+      <span class="subtitle">Gestão Profissional de Charcutaria</span>
+      <div class="sync-status" id="syncStatus">
+        <span class="dot offline"></span> Verificando…
+      </div>
+    </div>
+    <nav class="main-nav">
+      <button class="nav-btn active" data-section="dashboard">Dashboard</button>
+      <button class="nav-btn" data-section="lotes">Lotes</button>
+      <button class="nav-btn" data-section="vendas">Vendas</button>
+      <button class="nav-btn" data-section="compras">Compras</button>
+      <button class="nav-btn" data-section="ia">Painel IA</button>
+    </nav>
+  </header>
+
+  <main class="main-content">
+
+    <!-- ===== Dashboard ===== -->
+    <section id="dashboard" class="section active">
+      <h2>Dashboard</h2>
+
+      <!-- KPI cards -->
+      <div class="kpi-grid" id="kpiGrid">
+        <div class="kpi-card" id="kpiLotesAtivos">
+          <span class="kpi-label">Lotes Ativos</span>
+          <span class="kpi-value" id="totalLotes">–</span>
+        </div>
+        <div class="kpi-card" id="kpiUnidades">
+          <span class="kpi-label">Unidades em Estoque</span>
+          <span class="kpi-value" id="totalUnidades">–</span>
+        </div>
+        <div class="kpi-card" id="kpiVendasMes">
+          <span class="kpi-label">Vendas (mês atual)</span>
+          <span class="kpi-value" id="vendasMes">–</span>
+        </div>
+        <div class="kpi-card" id="kpiLucroMes">
+          <span class="kpi-label">Lucro Estimado (mês)</span>
+          <span class="kpi-value" id="lucroMes">–</span>
+        </div>
+      </div>
+
+      <!-- Stock alerts -->
+      <div class="card alerts-card" id="alertsCard">
+        <h3>⚠️ Alertas de Estoque</h3>
+        <div id="alertList"><p class="empty-msg">Nenhum alerta no momento.</p></div>
+      </div>
+
+      <!-- Maturation tracking -->
+      <div class="card" id="maturacaoCard">
+        <h3>🧂 Lotes em Maturação</h3>
+        <div id="maturacaoList"><p class="empty-msg">Nenhum lote em maturação.</p></div>
+      </div>
+    </section>
+
+    <!-- ===== Lotes ===== -->
+    <section id="lotes" class="section">
+      <div class="section-header">
+        <h2>Lotes de Produção</h2>
+        <button class="btn-primary" id="btnNovoLote">+ Novo Lote</button>
+      </div>
+
+      <!-- New Lot Form -->
+      <div class="card form-card hidden" id="formLote">
+        <h3>Registrar Lote</h3>
+        <form id="loteForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="loteProduto">Produto</label>
+              <select id="loteProduto" required>
+                <option value="">Selecione…</option>
+                <option value="linguica_defumada">Linguiça Defumada</option>
+                <option value="linguica_fresca">Linguiça Fresca</option>
+                <option value="salame">Salame</option>
+                <option value="copa">Copa</option>
+                <option value="bacon">Bacon</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="loteCarne">Carne (kg)</label>
+              <input type="number" id="loteCarne" min="1" step="0.1" required />
+            </div>
+            <div class="form-group">
+              <label for="lotePrecoCarne">Preço Carne (R$/kg)</label>
+              <input type="number" id="lotePrecoCarne" min="0" step="0.01" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="loteMetrosTripa">Metros de Tripa</label>
+              <input type="number" id="loteMetrosTripa" min="0" step="0.1" />
+            </div>
+            <div class="form-group">
+              <label for="loteDataProducao">Data de Produção</label>
+              <input type="date" id="loteDataProducao" required />
+            </div>
+            <div class="form-group" id="maturacaoGroup">
+              <label for="loteDiasMaturacao">Dias de Maturação</label>
+              <input type="number" id="loteDiasMaturacao" min="0" step="1" value="0" />
+            </div>
+          </div>
+
+          <!-- Cost preview -->
+          <div class="cost-preview card" id="costPreview">
+            <h4>Custo Estimado</h4>
+            <div class="cost-row"><span>Carne</span><span id="custoCarne">R$ 0,00</span></div>
+            <div class="cost-row"><span>Aglomix (350g/10kg)</span><span id="custoAglomix">R$ 0,00</span></div>
+            <div class="cost-row"><span>Alho (100g/10kg)</span><span id="custoAlho">R$ 0,00</span></div>
+            <div class="cost-row"><span>Tripas</span><span id="custoTripa">R$ 0,00</span></div>
+            <div class="cost-row total"><span>Total</span><span id="custoTotal">R$ 0,00</span></div>
+            <div class="cost-row" id="unidadesEstimadas"><span>Unidades Estimadas</span><span id="qtdUnidades">–</span></div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Salvar Lote</button>
+            <button type="button" class="btn-secondary" id="btnCancelarLote">Cancelar</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Lots table -->
+      <div class="card table-card">
+        <table id="lotesTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Produto</th>
+              <th>Carne (kg)</th>
+              <th>Data</th>
+              <th>Custo Total</th>
+              <th>Unidades</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="lotesBody">
+            <tr><td colspan="8" class="empty-msg">Nenhum lote cadastrado.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== Vendas ===== -->
+    <section id="vendas" class="section">
+      <div class="section-header">
+        <h2>Vendas</h2>
+        <button class="btn-primary" id="btnNovaVenda">+ Nova Venda</button>
+      </div>
+
+      <!-- New Sale Form -->
+      <div class="card form-card hidden" id="formVenda">
+        <h3>Registrar Venda</h3>
+        <form id="vendaForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="vendaLote">Lote</label>
+              <select id="vendaLote" required></select>
+            </div>
+            <div class="form-group">
+              <label for="vendaCliente">Cliente</label>
+              <input type="text" id="vendaCliente" placeholder="Nome do cliente" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="vendaUnidades">Unidades</label>
+              <input type="number" id="vendaUnidades" min="1" required />
+            </div>
+            <div class="form-group">
+              <label for="vendaPrecoUnit">Preço Unitário (R$)</label>
+              <input type="number" id="vendaPrecoUnit" min="0" step="0.01" required />
+            </div>
+            <div class="form-group">
+              <label for="vendaData">Data da Venda</label>
+              <input type="date" id="vendaData" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Total: <strong id="vendaTotal">R$ 0,00</strong></label>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Registrar</button>
+            <button type="button" class="btn-secondary" id="btnCancelarVenda">Cancelar</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Sales table -->
+      <div class="card table-card">
+        <table id="vendasTable">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Lote</th>
+              <th>Produto</th>
+              <th>Cliente</th>
+              <th>Unidades</th>
+              <th>Preço Unit.</th>
+              <th>Total</th>
+              <th>Lucro Estimado</th>
+            </tr>
+          </thead>
+          <tbody id="vendasBody">
+            <tr><td colspan="8" class="empty-msg">Nenhuma venda registrada.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== Compras ===== -->
+    <section id="compras" class="section">
+      <div class="section-header">
+        <h2>Registro de Compras</h2>
+        <button class="btn-primary" id="btnNovaCompra">+ Nova Compra</button>
+      </div>
+
+      <!-- New Purchase Form -->
+      <div class="card form-card hidden" id="formCompra">
+        <h3>Registrar Compra</h3>
+        <form id="compraForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="compraItem">Item</label>
+              <select id="compraItem" required>
+                <option value="">Selecione…</option>
+                <option value="carne_suina">Carne Suína</option>
+                <option value="carne_bovina">Carne Bovina</option>
+                <option value="tripa">Tripa</option>
+                <option value="aglomix">Tempero Aglomix</option>
+                <option value="alho">Alho</option>
+                <option value="sal">Sal</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="compraQtd">Quantidade</label>
+              <input type="number" id="compraQtd" min="0" step="0.01" required />
+            </div>
+            <div class="form-group">
+              <label for="compraUnidade">Unidade</label>
+              <select id="compraUnidade">
+                <option value="kg">kg</option>
+                <option value="metros">metros</option>
+                <option value="unid">unid</option>
+                <option value="moco">moço (30m)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="compraPreco">Custo Total (R$)</label>
+              <input type="number" id="compraPreco" min="0" step="0.01" required />
+            </div>
+            <div class="form-group">
+              <label for="compraData">Data</label>
+              <input type="date" id="compraData" required />
+            </div>
+            <div class="form-group">
+              <label for="compraFornecedor">Fornecedor</label>
+              <input type="text" id="compraFornecedor" placeholder="Nome do fornecedor" />
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Salvar</button>
+            <button type="button" class="btn-secondary" id="btnCancelarCompra">Cancelar</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card table-card">
+        <table id="comprasTable">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Item</th>
+              <th>Quantidade</th>
+              <th>Unidade</th>
+              <th>Custo Total</th>
+              <th>Fornecedor</th>
+            </tr>
+          </thead>
+          <tbody id="comprasBody">
+            <tr><td colspan="6" class="empty-msg">Nenhuma compra registrada.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== IA Panel ===== -->
+    <section id="ia" class="section">
+      <h2>🤖 Painel de Inteligência Artificial</h2>
+      <p class="section-desc">
+        O agente de IA analisa estoque, calcula lucro real com quebra de maturação e sugere compras para os próximos 30 dias.
+        As chamadas são feitas pelo backend (chave de API nunca fica exposta no frontend).
+      </p>
+
+      <div class="ia-actions">
+        <button class="btn-primary" id="btnAnalisarEstoque">📊 Analisar Estoque e Lucro</button>
+        <button class="btn-primary" id="btnSugestaoCompras">🛒 Sugestão de Compras (30 dias)</button>
+        <button class="btn-secondary" id="btnPerguntaLivre">💬 Pergunta Livre</button>
+      </div>
+
+      <!-- Free question panel -->
+      <div class="card hidden" id="formPerguntaLivre">
+        <h3>Pergunta Livre para o Agente</h3>
+        <textarea id="textPergunta" rows="3" placeholder="Ex.: Qual o salame mais lucrativo? Quanto devo produzir semana que vem?"></textarea>
+        <button class="btn-primary" id="btnEnviarPergunta">Enviar</button>
+      </div>
+
+      <!-- Backend URL config -->
+      <div class="card config-card" id="backendConfig">
+        <h4>⚙️ Configuração do Backend</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="backendUrl">URL do Backend Node.js</label>
+            <input type="url" id="backendUrl" placeholder="http://localhost:3001" />
+          </div>
+          <button class="btn-secondary" id="btnSalvarBackend">Salvar</button>
+        </div>
+        <p class="hint">Configure a URL do servidor Node.js para habilitar análises de IA.</p>
+      </div>
+
+      <!-- AI Response -->
+      <div class="card ia-response-card" id="iaResponseCard">
+        <div class="ia-header">
+          <h3>Resposta do Agente</h3>
+          <span class="ia-provider" id="iaProvider"></span>
+        </div>
+        <div id="iaLoading" class="ia-loading hidden">
+          <div class="spinner"></div>
+          <span>Consultando agente de IA…</span>
+        </div>
+        <div id="iaResponse" class="ia-response">
+          <p class="empty-msg">Clique em um botão acima para iniciar a análise.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast notifications -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Confirmation modal -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-box">
+      <p id="modalMsg"></p>
+      <div class="modal-actions">
+        <button class="btn-danger" id="modalConfirm">Confirmar</button>
+        <button class="btn-secondary" id="modalCancel">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- App scripts (type="module" for ES module imports) -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
