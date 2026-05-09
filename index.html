@@ -824,6 +824,11 @@ tbody td:first-child { color: var(--text); }
 // ========== DADOS ==========
 let dados = JSON.parse(localStorage.getItem('salame_dados') || '{"lotes":[],"vendas":[],"clientes":[]}');
 const API_BASE_STORAGE_KEY = 'salame_api_base_url';
+const AUTO_SYNC_ENABLED_KEY = 'salame_auto_sync_enabled';
+const AUTO_SYNC_INTERVAL_MS = 60000;
+let autoSyncTimer = null;
+let autoSyncInFlight = false;
+let autoSyncBootstrapped = false;
 
 function defaultApiBaseUrl() {
   const host = window.location.hostname;
@@ -865,20 +870,70 @@ function setIaStatus(html, tipo = 'neutro') {
 }
 
 async function sincronizarParaNuvem() {
+  return sincronizarParaNuvemInterno({ silent: false, allowEmptyOverwrite: false });
+}
+
+function totalRegistros(snapshot) {
+  const lotes = Array.isArray(snapshot?.lotes) ? snapshot.lotes.length : 0;
+  const vendas = Array.isArray(snapshot?.vendas) ? snapshot.vendas.length : 0;
+  const clientes = Array.isArray(snapshot?.clientes) ? snapshot.clientes.length : 0;
+  return lotes + vendas + clientes;
+}
+
+function mergeArraysById(localArr, cloudArr) {
+  const map = new Map();
+
+  const upsert = (item) => {
+    const key = item?.id ? `id:${item.id}` : `raw:${JSON.stringify(item)}`;
+    if (!map.has(key)) {
+      map.set(key, item);
+      return;
+    }
+
+    const atual = map.get(key) || {};
+    const merged = { ...atual, ...item };
+    map.set(key, merged);
+  };
+
+  (localArr || []).forEach(upsert);
+  (cloudArr || []).forEach(upsert);
+  return Array.from(map.values());
+}
+
+function mergeSnapshots(localSnapshot, cloudSnapshot) {
+  return {
+    lotes: mergeArraysById(localSnapshot?.lotes || [], cloudSnapshot?.lotes || []),
+    vendas: mergeArraysById(localSnapshot?.vendas || [], cloudSnapshot?.vendas || []),
+    clientes: mergeArraysById(localSnapshot?.clientes || [], cloudSnapshot?.clientes || [])
+  };
+}
+
+function autoSyncEnabled() {
+  const raw = localStorage.getItem(AUTO_SYNC_ENABLED_KEY);
+  if (raw === null) return true;
+  return raw === '1';
+}
+
+async function sincronizarParaNuvemInterno({ silent = false, allowEmptyOverwrite = false } = {}) {
   const totalLocal =
     (Array.isArray(dados?.lotes) ? dados.lotes.length : 0) +
     (Array.isArray(dados?.vendas) ? dados.vendas.length : 0) +
     (Array.isArray(dados?.clientes) ? dados.clientes.length : 0);
 
-  if (!totalLocal) {
+  if (!totalLocal && !allowEmptyOverwrite) {
     const ok = confirm('Este dispositivo esta sem dados locais. Se continuar, pode sobrescrever a nuvem com vazio. Deseja continuar?');
     if (!ok) {
-      setIaStatus('Sincronizacao cancelada para evitar sobrescrever a nuvem com dados vazios.', 'neutro');
-      return;
+      if (!silent) {
+        setIaStatus('Sincronizacao cancelada para evitar sobrescrever a nuvem com dados vazios.', 'neutro');
+      }
+      return { ok: false, skipped: true };
     }
   }
 
-  setIaStatus('Sincronizando snapshot local para o Firestore...', 'neutro');
+  if (!silent) {
+    setIaStatus('Sincronizando snapshot local para o Firestore...', 'neutro');
+  }
+
   try {
     const response = await fetch(getApiUrl('/api/sync/import-local'), {
       method: 'POST',
@@ -889,14 +944,27 @@ async function sincronizarParaNuvem() {
     if (!response.ok || !payload.ok) {
       throw new Error(payload.error || 'Falha na sincronizacao.');
     }
-    setIaStatus(`Sincronizacao concluida!\nLotes: ${payload.result.lotes}\nVendas: ${payload.result.vendas}\nClientes: ${payload.result.clientes}\nAtualizado em: ${payload.result.updatedAt}`, 'ok');
+    if (!silent) {
+      setIaStatus(`Sincronizacao concluida!\nLotes: ${payload.result.lotes}\nVendas: ${payload.result.vendas}\nClientes: ${payload.result.clientes}\nAtualizado em: ${payload.result.updatedAt}`, 'ok');
+    }
+    return { ok: true, payload };
   } catch (error) {
-    setIaStatus(`Erro ao sincronizar: ${error.message}`, 'erro');
+    if (!silent) {
+      setIaStatus(`Erro ao sincronizar: ${error.message}`, 'erro');
+    }
+    return { ok: false, error };
   }
 }
 
 async function carregarDaNuvem() {
-  setIaStatus('Baixando snapshot do Firestore para este dispositivo...', 'neutro');
+  return carregarDaNuvemInterno({ silent: false });
+}
+
+async function carregarDaNuvemInterno({ silent = false } = {}) {
+  if (!silent) {
+    setIaStatus('Baixando snapshot do Firestore para este dispositivo...', 'neutro');
+  }
+
   try {
     const response = await fetch(getApiUrl('/api/sync/export-cloud'));
     const payload = await response.json();
@@ -915,13 +983,84 @@ async function carregarDaNuvem() {
     renderAll();
     popularFiltroMes();
 
-    setIaStatus(
-      `Dados carregados da nuvem com sucesso!\nLotes: ${dados.lotes.length}\nVendas: ${dados.vendas.length}\nClientes: ${dados.clientes.length}\nAtualizado em: ${snapshot.updatedAt || '—'}`,
-      'ok'
-    );
+    if (!silent) {
+      setIaStatus(
+        `Dados carregados da nuvem com sucesso!\nLotes: ${dados.lotes.length}\nVendas: ${dados.vendas.length}\nClientes: ${dados.clientes.length}\nAtualizado em: ${snapshot.updatedAt || '—'}`,
+        'ok'
+      );
+    }
+    return { ok: true, snapshot };
   } catch (error) {
-    setIaStatus(`Erro ao carregar da nuvem: ${error.message}`, 'erro');
+    if (!silent) {
+      setIaStatus(`Erro ao carregar da nuvem: ${error.message}`, 'erro');
+    }
+    return { ok: false, error };
   }
+}
+
+function agendarAutoSync() {
+  if (!autoSyncEnabled()) return;
+  if (!autoSyncBootstrapped) return;
+  if (autoSyncTimer) clearTimeout(autoSyncTimer);
+
+  autoSyncTimer = setTimeout(() => {
+    sincronizarAutomaticamenteSilencioso();
+  }, 1500);
+}
+
+async function sincronizarAutomaticamenteSilencioso() {
+  if (!autoSyncEnabled()) return;
+  if (autoSyncInFlight) return;
+
+  autoSyncInFlight = true;
+  try {
+    const cloudResp = await fetch(getApiUrl('/api/sync/export-cloud'));
+    const cloudPayload = await cloudResp.json();
+    if (!cloudResp.ok || !cloudPayload.ok) return;
+
+    const cloud = cloudPayload.result || { lotes: [], vendas: [], clientes: [] };
+    const local = {
+      lotes: Array.isArray(dados?.lotes) ? dados.lotes : [],
+      vendas: Array.isArray(dados?.vendas) ? dados.vendas : [],
+      clientes: Array.isArray(dados?.clientes) ? dados.clientes : []
+    };
+
+    const merged = mergeSnapshots(local, cloud);
+    const localStr = JSON.stringify(local);
+    const mergedStr = JSON.stringify(merged);
+
+    if (localStr !== mergedStr) {
+      dados = merged;
+      salvar();
+      renderAll();
+      popularFiltroMes();
+    }
+
+    const localCount = totalRegistros(local);
+    const cloudCount = totalRegistros(cloud);
+    const mergedCount = totalRegistros(merged);
+    const precisaEmpurrar = mergedCount > cloudCount || mergedCount > localCount || localStr !== mergedStr;
+    if (precisaEmpurrar) {
+      await sincronizarParaNuvemInterno({ silent: true, allowEmptyOverwrite: true });
+    }
+  } catch (_error) {
+    // Sincronizacao silenciosa: falhas intermitentes nao interrompem uso local.
+  } finally {
+    autoSyncInFlight = false;
+  }
+}
+
+async function bootstrapAutoSync() {
+  if (!autoSyncEnabled()) {
+    autoSyncBootstrapped = true;
+    return;
+  }
+
+  await sincronizarAutomaticamenteSilencioso();
+  autoSyncBootstrapped = true;
+  setInterval(() => {
+    sincronizarAutomaticamenteSilencioso();
+  }, AUTO_SYNC_INTERVAL_MS);
 }
 
 async function consultarAgente() {
@@ -963,6 +1102,7 @@ function qtdUnidades(kg, pesoGramas) {
 
 function salvar() {
   localStorage.setItem('salame_dados', JSON.stringify(dados));
+  agendarAutoSync();
 }
 
 function moeda(v) {
@@ -1009,6 +1149,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderAll();
   calcularTotal();
   popularFiltroMes();
+  bootstrapAutoSync();
 });
 
 function atualizarPreviewLote() {
