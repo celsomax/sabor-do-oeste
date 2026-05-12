@@ -1478,10 +1478,17 @@ function editarVenda(id) {
   alert('Venda atualizada com sucesso!');
 }
 
-function deletarLote(id) {
+async function deletarLote(id) {
   const temVenda = dados.vendas.some(v => v.loteId === id);
   if (temVenda) return alert('Este lote tem vendas registradas. Remova as vendas primeiro.');
   if (!confirm('Remover este lote?')) return;
+
+  try {
+    await fetch(getApiUrl(`/api/sync/lote/${encodeURIComponent(id)}`), { method: 'DELETE' });
+  } catch (_error) {
+    // A sincronizacao automatica enviara novamente; falha de rede nao bloqueia exclusao local.
+  }
+
   dados.lotes = dados.lotes.filter(l => l.id !== id);
   salvar(); renderAll(); popularSelectLotes();
 }

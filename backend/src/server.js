@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { config } from './config.js';
 import { analisarComIA } from './services/ai.js';
-import { exportSnapshotFromCloud, importSnapshotFromLocal } from './services/firestore.js';
+import { deleteLoteFromCloud, exportSnapshotFromCloud, importSnapshotFromLocal } from './services/firestore.js';
 
 const app = express();
 
@@ -50,6 +50,15 @@ app.post('/api/sync/import-local', async (req, res) => {
 app.get('/api/sync/export-cloud', async (_req, res) => {
   try {
     const result = await exportSnapshotFromCloud();
+    res.json({ ok: true, result });
+  } catch (error) {
+    res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+app.delete('/api/sync/lote/:id', async (req, res) => {
+  try {
+    const result = await deleteLoteFromCloud(req.params?.id || '');
     res.json({ ok: true, result });
   } catch (error) {
     res.status(500).json({ ok: false, error: error.message });

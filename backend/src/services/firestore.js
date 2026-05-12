@@ -38,16 +38,31 @@ export function getFirestore() {
 
 export async function importSnapshotFromLocal(payload) {
   const firestore = getFirestore();
+  const docRef = firestore.collection('sabor_do_oeste').doc('snapshot');
+  const atual = await docRef.get();
+  const atualData = atual.exists ? atual.data() || {} : {};
+
+  const deleted = {
+    lotes: Array.isArray(atualData?.deleted?.lotes) ? atualData.deleted.lotes : [],
+    vendas: Array.isArray(atualData?.deleted?.vendas) ? atualData.deleted.vendas : [],
+    clientes: Array.isArray(atualData?.deleted?.clientes) ? atualData.deleted.clientes : []
+  };
+
+  const deletedLotes = new Set(deleted.lotes);
+  const deletedVendas = new Set(deleted.vendas);
+  const deletedClientes = new Set(deleted.clientes);
+
   const snapshot = {
-    lotes: Array.isArray(payload?.lotes) ? payload.lotes : [],
-    vendas: Array.isArray(payload?.vendas) ? payload.vendas : [],
-    clientes: Array.isArray(payload?.clientes) ? payload.clientes : []
+    lotes: (Array.isArray(payload?.lotes) ? payload.lotes : []).filter((l) => !deletedLotes.has(l?.id)),
+    vendas: (Array.isArray(payload?.vendas) ? payload.vendas : []).filter((v) => !deletedVendas.has(v?.id) && !deletedLotes.has(v?.loteId)),
+    clientes: (Array.isArray(payload?.clientes) ? payload.clientes : []).filter((c) => !deletedClientes.has(c?.id))
   };
 
   const now = new Date().toISOString();
-  await firestore.collection('sabor_do_oeste').doc('snapshot').set(
+  await docRef.set(
     {
       ...snapshot,
+      deleted,
       updatedAt: now
     },
     { merge: true }
@@ -80,5 +95,56 @@ export async function exportSnapshotFromCloud() {
     vendas: Array.isArray(data.vendas) ? data.vendas : [],
     clientes: Array.isArray(data.clientes) ? data.clientes : [],
     updatedAt: data.updatedAt || null
+  };
+}
+
+export async function deleteLoteFromCloud(loteId) {
+  const id = (loteId || '').trim();
+  if (!id) {
+    throw new Error('ID do lote obrigatorio.');
+  }
+
+  const firestore = getFirestore();
+  const docRef = firestore.collection('sabor_do_oeste').doc('snapshot');
+  const snap = await docRef.get();
+  const data = snap.exists ? snap.data() || {} : {};
+
+  const lotes = Array.isArray(data.lotes) ? data.lotes : [];
+  const vendas = Array.isArray(data.vendas) ? data.vendas : [];
+  const clientes = Array.isArray(data.clientes) ? data.clientes : [];
+
+  const lotesFiltrados = lotes.filter((l) => l?.id !== id);
+  const vendasFiltradas = vendas.filter((v) => v?.loteId !== id);
+  const removedLotes = lotes.length - lotesFiltrados.length;
+  const removedVendas = vendas.length - vendasFiltradas.length;
+
+  const deletedAtual = {
+    lotes: Array.isArray(data?.deleted?.lotes) ? data.deleted.lotes : [],
+    vendas: Array.isArray(data?.deleted?.vendas) ? data.deleted.vendas : [],
+    clientes: Array.isArray(data?.deleted?.clientes) ? data.deleted.clientes : []
+  };
+
+  const deletedLotes = Array.from(new Set([...deletedAtual.lotes, id]));
+
+  const now = new Date().toISOString();
+  await docRef.set(
+    {
+      lotes: lotesFiltrados,
+      vendas: vendasFiltradas,
+      clientes,
+      deleted: {
+        ...deletedAtual,
+        lotes: deletedLotes
+      },
+      updatedAt: now
+    },
+    { merge: true }
+  );
+
+  return {
+    loteId: id,
+    removedLotes,
+    removedVendas,
+    updatedAt: now
   };
 }
