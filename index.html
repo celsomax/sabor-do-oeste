@@ -1337,7 +1337,13 @@ async function sincronizarAutomaticamenteSilencioso() {
           clientes: Array.isArray(cloud.clientes) ? cloud.clientes : [],
           pedidos: Array.isArray(cloud.pedidos) ? cloud.pedidos : []
         }
-      : mergeSnapshots(local, cloud, 'local');
+      // Se o local foi alterado por ultimo (ex.: exclusao), ele deve prevalecer.
+      : {
+          lotes: Array.isArray(local.lotes) ? local.lotes : [],
+          vendas: Array.isArray(local.vendas) ? local.vendas : [],
+          clientes: Array.isArray(local.clientes) ? local.clientes : [],
+          pedidos: Array.isArray(local.pedidos) ? local.pedidos : []
+        };
     const localStr = JSON.stringify(local);
     const cloudStr = JSON.stringify({
       lotes: Array.isArray(cloud.lotes) ? cloud.lotes : [],
