@@ -1550,6 +1550,29 @@ function validarEmail(email) {
   return { ok: true, email: valor };
 }
 
+function normalizarWhatsAppBR(fone) {
+  const digits = String(fone || '').replace(/\D/g, '');
+  const semDdi = digits.startsWith('55') ? digits.slice(2) : digits;
+  if (semDdi.length < 10 || semDdi.length > 11) return null;
+  return semDdi;
+}
+
+function formatarWhatsAppBR(semDdi) {
+  if (!semDdi) return '';
+  if (semDdi.length === 11) {
+    return `(${semDdi.slice(0,2)}) ${semDdi.slice(2,7)}-${semDdi.slice(7)}`;
+  }
+  return `(${semDdi.slice(0,2)}) ${semDdi.slice(2,6)}-${semDdi.slice(6)}`;
+}
+
+function precoPedidoOnlinePadrao() {
+  const ativos = (dados.lotes || [])
+    .filter(l => l.status === 'ativo' && Number(l.precoVenda) > 0)
+    .sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+  if (ativos.length) return Number(ativos[0].precoVenda);
+  return 12.5;
+}
+
 function formatData(d) {
   if (!d) return '—';
   const p = d.split('-');
@@ -2185,11 +2208,16 @@ function renderPedidosOnline() {
   vazio.style.display = 'none';
   container.innerHTML = pedidos.map(p => {
     const cliente = dados.clientes.find(c => c.id === p.clienteId);
+    const whatsapp = (cliente?.fone || '').replace(/\D/g, '');
     return `
       <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:14px;position:relative;">
         <div style="margin-bottom:8px;">
           <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:16px;color:var(--text);">${cliente?.nome || 'Cliente'}</div>
           <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">${p.id} · ${formatData(p.data)}</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
+            ${cliente?.fone ? `<a href="https://wa.me/55${whatsapp}" target="_blank" style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;text-decoration:none;">📱 ${cliente.fone}</a>` : ''}
+            ${cliente?.email ? `<a href="mailto:${cliente.email}" style="font-size:11px;color:var(--blue);font-family:'DM Mono',monospace;text-decoration:none;">✉️ ${cliente.email}</a>` : ''}
+          </div>
         </div>
         <div style="background:var(--bg3);border-radius:var(--radius);padding:10px;margin-bottom:10px;border:1px solid var(--border2);">
           <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
@@ -2658,18 +2686,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ===== FUNCOES PEDIDOS ONLINE =====
 function calcularTotalPedido() {
-  const qtd = +document.getElementById('pedido-qtd').value || 1;
-  const preco = +document.getElementById('pedido-preco').value || 0;
+  const qtd = Math.max(1, parseInt(document.getElementById('pedido-qtd').value || '1', 10));
+  const preco = +document.getElementById('pedido-preco').value || precoPedidoOnlinePadrao();
   const total = qtd * preco;
+  document.getElementById('pedido-qtd').value = qtd;
+  document.getElementById('pedido-preco-visual').textContent = moeda(preco) + ' / unidade';
   document.getElementById('pedido-total-valor').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
 }
 
 function enviarPedidoOnline() {
   const nome = document.getElementById('pedido-nome').value.trim();
   const emailRaw = document.getElementById('pedido-email').value;
-  const fone = document.getElementById('pedido-fone').value.trim();
+  const foneRaw = document.getElementById('pedido-fone').value.trim();
   const produto = document.getElementById('pedido-produto').value;
-  const qtd = +document.getElementById('pedido-qtd').value;
+  const qtd = Math.max(1, parseInt(document.getElementById('pedido-qtd').value || '1', 10));
   const preco = +document.getElementById('pedido-preco').value;
   const data = document.getElementById('pedido-data').value;
   const obs = document.getElementById('pedido-obs').value.trim();
@@ -2680,9 +2710,21 @@ function enviarPedidoOnline() {
     return;
   }
   const email = validacaoEmail.email;
+
+  const foneNormalizado = normalizarWhatsAppBR(foneRaw);
+  if (!foneNormalizado) {
+    alert('WhatsApp inválido. Use DDD + número (10 ou 11 dígitos).');
+    return;
+  }
+  const fone = formatarWhatsAppBR(foneNormalizado);
   
-  if (!nome || !fone || !produto || !qtd || !preco || !data) {
+  if (!nome || !produto || !qtd || !preco || !data) {
     alert('Preencha todos os campos!');
+    return;
+  }
+
+  if (data < hoje()) {
+    alert('A data de entrega deve ser hoje ou futura.');
     return;
   }
   
@@ -2717,6 +2759,12 @@ function enviarPedidoOnline() {
   
   if (!Array.isArray(dados.pedidos)) dados.pedidos = [];
   dados.pedidos.push(pedido);
+
+  const btn = document.getElementById('btn-enviar-pedido');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+  }
   
   fetch(getApiUrl('/api/sync/import-local'), {
     method: 'POST',
@@ -2724,15 +2772,23 @@ function enviarPedidoOnline() {
     body: JSON.stringify({ dados })
   })
   .then(() => {
-    alert('✓ Pedido recebido!\n\nID: ' + pedido.id + '\n\nVocê receberá confirmação por WhatsApp em breve.\n\nObrigado!');
+    alert('✓ Pedido recebido com sucesso!\n\nID: ' + pedido.id + '\n\nEm breve entraremos em contato pelo WhatsApp.');
     document.getElementById('pedido-nome').value = '';
     document.getElementById('pedido-email').value = '';
     document.getElementById('pedido-fone').value = '';
     document.getElementById('pedido-qtd').value = 1;
+    document.getElementById('pedido-data').value = hoje();
+    document.getElementById('pedido-obs').value = '';
     calcularTotalPedido();
   })
   .catch(() => {
     alert('Erro ao enviar pedido. Tente novamente.');
+  })
+  .finally(() => {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = '✓ Enviar Pedido';
+    }
   });
 }
 
@@ -2796,8 +2852,9 @@ function mostrarInterfacePedidos() {
                   <input class="form-input" type="number" id="pedido-qtd" value="1" min="1">
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Preço Unitário (R$)</label>
-                  <input class="form-input" type="number" id="pedido-preco" value="12.50" step="0.50">
+                  <label class="form-label">Preço Unitário</label>
+                  <div id="pedido-preco-visual" style="height:38px;display:flex;align-items:center;padding:0 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--gold2);font-family:'DM Mono',monospace;font-size:12px;">R$ 12,50 / unidade</div>
+                  <input type="hidden" id="pedido-preco" value="12.50">
                 </div>
                 <div class="form-group" style="grid-column:1/-1;">
                   <label class="form-label">Data de Entrega Prevista</label>
@@ -2812,7 +2869,7 @@ function mostrarInterfacePedidos() {
                 Total: <strong style="font-size:16px;" id="pedido-total-valor">R$ 12,50</strong>
               </div>
               <button id="btn-enviar-pedido" class="btn btn-green" style="width:100%;padding:14px;border-radius:999px;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;">✓ Enviar Pedido</button>
-              <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px;font-family:'DM Mono',monospace;">Você receberá confirmação por WhatsApp</div>
+              <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px;font-family:'DM Mono',monospace;">Preço definido pela tabela oficial do dia. Você receberá confirmação por WhatsApp.</div>
             </div>
           </div>
         </main>
@@ -2821,12 +2878,33 @@ function mostrarInterfacePedidos() {
       // Adicionar event listeners após injetar HTML
       setTimeout(() => {
         const qtdInput = document.getElementById('pedido-qtd');
+        const dataInput = document.getElementById('pedido-data');
         const precoInput = document.getElementById('pedido-preco');
         const btnEnviar = document.getElementById('btn-enviar-pedido');
+        const foneInput = document.getElementById('pedido-fone');
+
+        // Aplicar preço automático com base no lote ativo mais recente
+        if (precoInput) precoInput.value = precoPedidoOnlinePadrao().toFixed(2);
+
+        // Data mínima e padrão para hoje
+        if (dataInput) {
+          dataInput.min = hoje();
+          dataInput.value = hoje();
+        }
+
+        // Máscara simples de WhatsApp durante digitação
+        if (foneInput) {
+          foneInput.addEventListener('input', () => {
+            const semDdi = normalizarWhatsAppBR(foneInput.value) || foneInput.value.replace(/\D/g, '').slice(0, 11);
+            if (typeof semDdi === 'string') {
+              foneInput.value = formatarWhatsAppBR(semDdi);
+            }
+          });
+        }
         
-        if (qtdInput) qtdInput.addEventListener('change', calcularTotalPedido);
-        if (precoInput) precoInput.addEventListener('change', calcularTotalPedido);
+        if (qtdInput) qtdInput.addEventListener('input', calcularTotalPedido);
         if (btnEnviar) btnEnviar.addEventListener('click', enviarPedidoOnline);
+        calcularTotalPedido();
       }, 100);
     });
 }
