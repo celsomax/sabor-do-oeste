@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sabor do Oeste · Gestão</title>
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="theme-color" content="#1d3323">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sabor do Oeste">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;0,900;1,600&family=DM+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -645,10 +650,13 @@ tbody td:first-child { color: var(--text); }
   <div id="lotes" class="pagina">
     <div class="secao" style="margin-bottom:16px;">
       <div class="secao-header">
-        <span class="secao-titulo">Registrar Novo Lote</span>
+        <span class="secao-titulo">🌭 Registrar Novo Lote</span>
       </div>
       <div class="secao-body">
-        <div class="form-grid">
+
+        <!-- DADOS BÁSICOS -->
+        <div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Dados do Lote</div>
+        <div class="form-grid" style="margin-bottom:16px;">
           <div class="form-group">
             <label class="form-label">Produto</label>
             <select class="form-select" id="l-produto">
@@ -660,13 +668,70 @@ tbody td:first-child { color: var(--text); }
             <input class="form-input" type="date" id="l-data">
           </div>
           <div class="form-group">
-            <label class="form-label">Kg de Carne (padrão 10kg)</label>
-            <input class="form-input" type="number" id="l-kg" value="10" step="0.5" min="1">
+            <label class="form-label">Total de Carnes (kg)</label>
+            <input class="form-input" type="number" id="l-kg" value="10" step="0.5" min="1" placeholder="Ex: 22">
           </div>
           <div class="form-group">
             <label class="form-label">Preço da Carne (R$/kg)</label>
             <input class="form-input" type="number" id="l-preco-carne" value="17" step="0.5">
           </div>
+        </div>
+
+        <!-- RECEITA AUTOMÁTICA -->
+        <div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Receita dos Ingredientes</div>
+        <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius2);padding:14px 16px;margin-bottom:16px;">
+          <div class="form-grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">
+
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;">🌿 Tempero · 3,00%</span>
+                <span id="l-receita-tempero" style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--text);">300 g</span>
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label class="form-label" style="font-size:10px;">Preço do tempero (R$/kg)</label>
+                <input class="form-input" type="number" id="l-preco-tempero" value="25" step="1" style="font-size:12px;padding:6px 8px;">
+              </div>
+            </div>
+
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;">🍬 Açúcar · 1,50%</span>
+                <span id="l-receita-acucar" style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--text);">150 g</span>
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label class="form-label" style="font-size:10px;">Preço do açúcar (R$/kg)</label>
+                <input class="form-input" type="number" id="l-preco-acucar" value="5" step="0.5" style="font-size:12px;padding:6px 8px;">
+              </div>
+            </div>
+
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;">🧄 Alho · 0,90%</span>
+                <span id="l-receita-alho" style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--text);">90 g</span>
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label class="form-label" style="font-size:10px;">Preço do alho (R$/kg)</label>
+                <input class="form-input" type="number" id="l-preco-alho" value="20" step="1" style="font-size:12px;padding:6px 8px;">
+              </div>
+            </div>
+
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;">🪡 Tripa · ~0,6 m/kg</span>
+                <span id="l-receita-tripa" style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--text);">6,0 m</span>
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label class="form-label" style="font-size:10px;">Preço da tripa (R$/m)</label>
+                <input class="form-input" type="number" id="l-preco-tripa" value="40" step="1" style="font-size:12px;padding:6px 8px;">
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- EMBALAGEM E VENDA -->
+        <div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Embalagem e Preço de Venda</div>
+        <div class="form-grid" style="margin-bottom:16px;">
           <div class="form-group">
             <label class="form-label">Peso médio por unidade (g)</label>
             <input class="form-input" type="number" id="l-peso-un" value="180" step="5">
@@ -675,12 +740,13 @@ tbody td:first-child { color: var(--text); }
             <label class="form-label">Preço de Venda (R$/un)</label>
             <input class="form-input" type="number" id="l-preco-venda" value="12.50" step="0.5">
           </div>
-          <div class="form-group">
+          <div class="form-group" style="grid-column:1/-1;">
             <label class="form-label">Observação</label>
             <input class="form-input" type="text" id="l-obs" placeholder="Ex: lote especial, alho extra...">
           </div>
         </div>
-        <div id="l-preview" style="margin-bottom:12px;"></div>
+
+        <div id="l-preview" style="margin-bottom:14px;"></div>
         <button class="btn btn-green" onclick="adicionarLote()">+ Registrar Lote</button>
       </div>
     </div>
@@ -1416,13 +1482,31 @@ async function consultarAgente() {
   }
 }
 
-// Custo fixo por kg
-function custoPorLote(kg, precoCarne) {
-  const carne = kg * precoCarne;
-  const tempero = (0.35 / 10) * kg * (68 / 5 / 1.01); // ~4.75/lote de 10kg
-  const alho = (0.1 / 10) * kg * 15; // 15/kg alho
-  const tripa = 0.6 * 40 * (kg / 10); // 60% de 30m a R$40
-  return +(carne + tempero + alho + tripa).toFixed(2);
+// Receita padrão da linguiça (percentuais sobre o peso da carne)
+const RECEITA = {
+  tempero: 0.0300,  // 3,00%
+  acucar:  0.0150,  // 1,50%
+  alho:    0.0090,  // 0,90%
+  tripaMetrosPorKg: 0.60  // 0,6 m por kg de carne
+};
+
+function calcularReceita(kg) {
+  return {
+    temperoG: +(kg * 1000 * RECEITA.tempero).toFixed(0),
+    acucarG:  +(kg * 1000 * RECEITA.acucar).toFixed(0),
+    alhoG:    +(kg * 1000 * RECEITA.alho).toFixed(0),
+    tripaM:   +(kg * RECEITA.tripaMetrosPorKg).toFixed(1)
+  };
+}
+
+function custoPorLote(kg, precoCarne, precoTempero = 25, precoAcucar = 5, precoAlho = 20, precoTripa = 40) {
+  const rec = calcularReceita(kg);
+  const carne   = kg * precoCarne;
+  const tempero = (rec.temperoG / 1000) * precoTempero;
+  const acucar  = (rec.acucarG  / 1000) * precoAcucar;
+  const alho    = (rec.alhoG    / 1000) * precoAlho;
+  const tripa   = rec.tripaM * precoTripa;
+  return +(carne + tempero + acucar + alho + tripa).toFixed(2);
 }
 
 function qtdUnidades(kg, pesoGramas) {
@@ -1496,7 +1580,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('l-data').value = hoje();
   document.getElementById('v-data').value = hoje();
   atualizarPreviewLote();
-  ['l-kg','l-preco-carne','l-peso-un','l-preco-venda'].forEach(id => {
+  ['l-kg','l-preco-carne','l-preco-tempero','l-preco-acucar','l-preco-alho','l-preco-tripa','l-peso-un','l-preco-venda'].forEach(id => {
     document.getElementById(id).addEventListener('input', atualizarPreviewLote);
   });
   document.getElementById('header-data').textContent = new Date().toLocaleDateString('pt-BR', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
@@ -1517,45 +1601,119 @@ document.addEventListener('visibilitychange', () => {
 });
 
 function atualizarPreviewLote() {
-  const kg = +document.getElementById('l-kg').value || 10;
-  const preco = +document.getElementById('l-preco-carne').value || 17;
-  const peso = +document.getElementById('l-peso-un').value || 180;
-  const precoVenda = +document.getElementById('l-preco-venda').value || 12.5;
-  const custo = custoPorLote(kg, preco);
-  const qtd = qtdUnidades(kg, peso);
-  const receita = qtd * precoVenda;
-  const lucro = receita - custo;
-  const margem = receita > 0 ? ((lucro/receita)*100).toFixed(0) : 0;
+  const kg           = +document.getElementById('l-kg').value || 10;
+  const preco        = +document.getElementById('l-preco-carne').value || 17;
+  const precoTemp    = +document.getElementById('l-preco-tempero').value || 25;
+  const precoAcucar  = +document.getElementById('l-preco-acucar').value || 5;
+  const precoAlho    = +document.getElementById('l-preco-alho').value || 20;
+  const precoTripa   = +document.getElementById('l-preco-tripa').value || 40;
+  const peso         = +document.getElementById('l-peso-un').value || 180;
+  const precoVenda   = +document.getElementById('l-preco-venda').value || 12.5;
+
+  // Atualizar quantidades da receita em tempo real
+  const rec = calcularReceita(kg);
+  document.getElementById('l-receita-tempero').textContent = rec.temperoG >= 1000
+    ? (rec.temperoG / 1000).toFixed(2) + ' kg' : rec.temperoG + ' g';
+  document.getElementById('l-receita-acucar').textContent  = rec.acucarG >= 1000
+    ? (rec.acucarG  / 1000).toFixed(2) + ' kg' : rec.acucarG  + ' g';
+  document.getElementById('l-receita-alho').textContent    = rec.alhoG >= 1000
+    ? (rec.alhoG    / 1000).toFixed(2) + ' kg' : rec.alhoG    + ' g';
+  document.getElementById('l-receita-tripa').textContent   = rec.tripaM + ' m';
+
+  const custo  = custoPorLote(kg, preco, precoTemp, precoAcucar, precoAlho, precoTripa);
+  const qtd    = qtdUnidades(kg, peso);
+  const receitaVal = qtd * precoVenda;
+  const lucro  = receitaVal - custo;
+  const margem = receitaVal > 0 ? ((lucro / receitaVal) * 100).toFixed(0) : 0;
+
+  // Custo detalhado por ingrediente
+  const custoCarne  = +(kg * preco).toFixed(2);
+  const custoTemp   = +((rec.temperoG / 1000) * precoTemp).toFixed(2);
+  const custoAcucar = +((rec.acucarG  / 1000) * precoAcucar).toFixed(2);
+  const custoAlho   = +((rec.alhoG    / 1000) * precoAlho).toFixed(2);
+  const custoTripa  = +(rec.tripaM * precoTripa).toFixed(2);
+
   document.getElementById('l-preview').innerHTML = `
-    <div style="display:flex;gap:12px;flex-wrap:wrap;background:var(--bg3);border-radius:var(--radius);padding:12px 14px;border:1px solid var(--border2);">
-      <div><span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;display:block;">Unidades</span><span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:var(--text);">${qtd}</span></div>
-      <div><span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;display:block;">Custo Total</span><span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:var(--red);">${moeda(custo)}</span></div>
-      <div><span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;display:block;">Receita Potencial</span><span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:var(--blue);">${moeda(receita)}</span></div>
-      <div><span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;display:block;">Lucro Potencial</span><span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:var(--green);">${moeda(lucro)}</span></div>
-      <div><span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;display:block;">Margem</span><span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:var(--gold);">${margem}%</span></div>
+    <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius2);padding:14px 16px;">
+      <div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;">Projeção do Lote</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+        <div style="flex:1;min-width:90px;background:var(--card);border-radius:var(--radius);padding:8px 10px;border:1px solid var(--border);">
+          <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:2px;">Unidades</div>
+          <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:800;color:var(--text);">${qtd}</div>
+        </div>
+        <div style="flex:1;min-width:90px;background:var(--card);border-radius:var(--radius);padding:8px 10px;border:1px solid var(--border);">
+          <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:2px;">Custo Total</div>
+          <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:800;color:var(--red);">${moeda(custo)}</div>
+        </div>
+        <div style="flex:1;min-width:90px;background:var(--card);border-radius:var(--radius);padding:8px 10px;border:1px solid var(--border);">
+          <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:2px;">Receita Potencial</div>
+          <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:800;color:var(--blue);">${moeda(receitaVal)}</div>
+        </div>
+        <div style="flex:1;min-width:90px;background:var(--card);border-radius:var(--radius);padding:8px 10px;border:1px solid var(--border);">
+          <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:2px;">Lucro Potencial</div>
+          <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:800;color:var(--green);">${moeda(lucro)}</div>
+        </div>
+        <div style="flex:1;min-width:90px;background:var(--card);border-radius:var(--radius);padding:8px 10px;border:1px solid var(--border);">
+          <div style="font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:2px;">Margem</div>
+          <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:800;color:var(--gold);">${margem}%</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Custo por ingrediente</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;">
+        <div style="display:flex;justify-content:space-between;background:var(--card);border-radius:var(--radius);padding:6px 10px;border:1px solid var(--border2);">
+          <span style="color:var(--text2);font-size:11px;">🥩 Carne ${kg}kg</span>
+          <span style="color:var(--text);font-family:'DM Mono',monospace;font-size:11px;font-weight:600;">${moeda(custoCarne)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;background:var(--card);border-radius:var(--radius);padding:6px 10px;border:1px solid var(--border2);">
+          <span style="color:var(--text2);font-size:11px;">🌿 Tempero ${rec.temperoG}g</span>
+          <span style="color:var(--text);font-family:'DM Mono',monospace;font-size:11px;font-weight:600;">${moeda(custoTemp)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;background:var(--card);border-radius:var(--radius);padding:6px 10px;border:1px solid var(--border2);">
+          <span style="color:var(--text2);font-size:11px;">🍬 Açúcar ${rec.acucarG}g</span>
+          <span style="color:var(--text);font-family:'DM Mono',monospace;font-size:11px;font-weight:600;">${moeda(custoAcucar)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;background:var(--card);border-radius:var(--radius);padding:6px 10px;border:1px solid var(--border2);">
+          <span style="color:var(--text2);font-size:11px;">🧄 Alho ${rec.alhoG}g</span>
+          <span style="color:var(--text);font-family:'DM Mono',monospace;font-size:11px;font-weight:600;">${moeda(custoAlho)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;background:var(--card);border-radius:var(--radius);padding:6px 10px;border:1px solid var(--border2);">
+          <span style="color:var(--text2);font-size:11px;">🪡 Tripa ${rec.tripaM}m</span>
+          <span style="color:var(--text);font-family:'DM Mono',monospace;font-size:11px;font-weight:600;">${moeda(custoTripa)}</span>
+        </div>
+      </div>
     </div>`;
 }
 
 // ===== ADICIONAR LOTE =====
 function adicionarLote() {
-  const produto = document.getElementById('l-produto').value;
-  const data = document.getElementById('l-data').value;
-  const kg = +document.getElementById('l-kg').value;
-  const precoCarne = +document.getElementById('l-preco-carne').value;
-  const pesoUn = +document.getElementById('l-peso-un').value;
-  const precoVenda = +document.getElementById('l-preco-venda').value;
-  const obs = document.getElementById('l-obs').value;
+  const produto      = document.getElementById('l-produto').value;
+  const data         = document.getElementById('l-data').value;
+  const kg           = +document.getElementById('l-kg').value;
+  const precoCarne   = +document.getElementById('l-preco-carne').value;
+  const precoTempero = +document.getElementById('l-preco-tempero').value || 25;
+  const precoAcucar  = +document.getElementById('l-preco-acucar').value || 5;
+  const precoAlho    = +document.getElementById('l-preco-alho').value || 20;
+  const precoTripa   = +document.getElementById('l-preco-tripa').value || 40;
+  const pesoUn       = +document.getElementById('l-peso-un').value;
+  const precoVenda   = +document.getElementById('l-preco-venda').value;
+  const obs          = document.getElementById('l-obs').value;
   if (!data || !kg || !precoCarne) return alert('Preencha data, kg e preço da carne!');
-  const id = 'L' + String(dados.lotes.length + 1).padStart(3, '0');
-  const custo = custoPorLote(kg, precoCarne);
+  const id       = 'L' + String(dados.lotes.length + 1).padStart(3, '0');
+  const rec      = calcularReceita(kg);
+  const custo    = custoPorLote(kg, precoCarne, precoTempero, precoAcucar, precoAlho, precoTripa);
   const unidades = qtdUnidades(kg, pesoUn);
-  dados.lotes.push({ id, produto, data, kg, precoCarne, pesoUn, precoVenda, obs, custo, unidades, status: 'ativo' });
+  dados.lotes.push({
+    id, produto, data, kg, precoCarne, pesoUn, precoVenda, obs,
+    custo, unidades, status: 'ativo',
+    receita: { temperoG: rec.temperoG, acucarG: rec.acucarG, alhoG: rec.alhoG, tripaM: rec.tripaM },
+    precos: { carne: precoCarne, tempero: precoTempero, acucar: precoAcucar, alho: precoAlho, tripa: precoTripa }
+  });
   salvar();
   renderAll();
   popularSelectLotes();
   popularFiltroMes();
   document.getElementById('l-obs').value = '';
-  alert('Lote ' + id + ' registrado com ' + unidades + ' unidades!');
+  alert(`✓ Lote ${id} registrado!\n\n${unidades} unidades · Custo: ${moeda(custo)}\n\nReceita:\n🌿 Tempero: ${rec.temperoG}g\n🍬 Açúcar: ${rec.acucarG}g\n🧄 Alho: ${rec.alhoG}g\n🪡 Tripa: ${rec.tripaM}m`);
 }
 
 // ===== ADICIONAR VENDA =====
