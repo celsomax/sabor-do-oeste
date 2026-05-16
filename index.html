@@ -539,7 +539,7 @@ tbody td:first-child { color: var(--text); }
       <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.1em;">Chave de Acesso</div>
       <input type="password" id="login-chave" placeholder="••••" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:'DM Mono',monospace;font-size:14px;outline:none;">
     </div>
-    <button onclick="fazerLogin()" style="width:100%;padding:12px;background:var(--green);color:#04281a;border:none;border-radius:999px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;cursor:pointer;">📍 Fazer Login</button>
+    <button id="btn-fazer-login" style="width:100%;padding:12px;background:var(--green);color:#04281a;border:none;border-radius:999px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;cursor:pointer;">📍 Fazer Login</button>
     <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:12px;font-family:'DM Mono',monospace;">Contato: celso@sabordo-oeste.com</div>
   </div>
 </div>
@@ -2430,6 +2430,21 @@ if (params.get('pedidos') === '1') {
 } else {
   verificarLogin();
 }
+
+// ===== EVENT LISTENERS =====
+document.addEventListener('DOMContentLoaded', function() {
+  const btnLogin = document.getElementById('btn-fazer-login');
+  if (btnLogin) {
+    btnLogin.addEventListener('click', fazerLogin);
+  }
+  
+  const loginChave = document.getElementById('login-chave');
+  if (loginChave) {
+    loginChave.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') fazerLogin();
+    });
+  }
+});
 
 function mostrarInterfacePedidos() {
   // Carregar dados da nuvem para ter produtos disponíveis
