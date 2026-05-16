@@ -886,6 +886,10 @@ tbody td:first-child { color: var(--text); }
             <input class="form-input" type="text" id="c-nome" placeholder="Nome do cliente">
           </div>
           <div class="form-group">
+            <label class="form-label">E-mail</label>
+            <input class="form-input" type="email" id="c-email" placeholder="cliente@gmail.com">
+          </div>
+          <div class="form-group">
             <label class="form-label">WhatsApp</label>
             <input class="form-input" type="text" id="c-fone" placeholder="(67) 9 9999-9999">
           </div>
@@ -919,6 +923,7 @@ tbody td:first-child { color: var(--text); }
             <thead>
               <tr>
                 <th>Nome</th>
+                <th>E-mail</th>
                 <th>WhatsApp</th>
                 <th>Tipo</th>
                 <th>Compras</th>
@@ -1433,6 +1438,28 @@ function hoje() {
   return new Date().toISOString().split('T')[0];
 }
 
+function normalizarEmail(email) {
+  return String(email || '').trim().toLowerCase();
+}
+
+function validarEmail(email) {
+  const valor = normalizarEmail(email);
+  const regex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+  if (!valor) {
+    return { ok: false, msg: 'Informe o e-mail do cliente (Gmail, Hotmail, Outlook etc).' };
+  }
+  if (!regex.test(valor)) {
+    return { ok: false, msg: 'E-mail inválido. Exemplo: cliente@gmail.com' };
+  }
+
+  const dominio = valor.split('@')[1] || '';
+  if (dominio.endsWith('.con')) {
+    return { ok: false, msg: 'Domínio de e-mail parece incorreto.' };
+  }
+
+  return { ok: true, email: valor };
+}
+
 function formatData(d) {
   if (!d) return '—';
   const p = d.split('-');
@@ -1608,16 +1635,26 @@ function adicionarVenda() {
 // ===== ADICIONAR CLIENTE =====
 function adicionarCliente() {
   const nome = document.getElementById('c-nome').value.trim();
+  const emailRaw = document.getElementById('c-email').value;
   const fone = document.getElementById('c-fone').value.trim();
   const tipo = document.getElementById('c-tipo').value;
   const obs = document.getElementById('c-obs').value.trim();
   if (!nome) return alert('Informe o nome do cliente!');
+
+  const validacaoEmail = validarEmail(emailRaw);
+  if (!validacaoEmail.ok) return alert(validacaoEmail.msg);
+
+  const email = validacaoEmail.email;
+  const emailDuplicado = dados.clientes.some(c => normalizarEmail(c.email) === email);
+  if (emailDuplicado) return alert('Já existe cliente com este e-mail cadastrado.');
+
   const id = 'C' + String(dados.clientes.length + 1).padStart(3, '0');
-  dados.clientes.push({ id, nome, fone, tipo, obs });
+  dados.clientes.push({ id, nome, email, fone, tipo, obs });
   salvar();
   renderAll();
   popularSelectClientes();
   document.getElementById('c-nome').value = '';
+  document.getElementById('c-email').value = '';
   document.getElementById('c-fone').value = '';
   document.getElementById('c-obs').value = '';
   alert('Cliente ' + nome + ' cadastrado!');
@@ -1799,6 +1836,14 @@ function editarCliente(id) {
   const foneRaw = prompt('WhatsApp do cliente', cliente.fone || '');
   if (foneRaw === null) return;
 
+  const emailRaw = prompt('E-mail do cliente', cliente.email || '');
+  if (emailRaw === null) return;
+  const validacaoEmail = validarEmail(emailRaw);
+  if (!validacaoEmail.ok) return alert(validacaoEmail.msg);
+  const email = validacaoEmail.email;
+  const emailDuplicado = dados.clientes.some(c => c.id !== cliente.id && normalizarEmail(c.email) === email);
+  if (emailDuplicado) return alert('Já existe outro cliente com este e-mail.');
+
   const tipoRaw = prompt('Tipo (Particular, Distribuidor, Parceiro)', cliente.tipo || 'Particular');
   if (tipoRaw === null) return;
   const tipo = tipoRaw.trim() || 'Particular';
@@ -1808,6 +1853,7 @@ function editarCliente(id) {
 
   cliente.nome = nome;
   cliente.fone = foneRaw.trim();
+  cliente.email = email;
   cliente.tipo = tipo;
   cliente.obs = obsRaw.trim();
 
@@ -2294,6 +2340,7 @@ function renderTabClientes() {
     const ultimo = cv.length ? cv[cv.length-1].data : null;
     return `<tr>
       <td>${c.nome}</td>
+      <td>${c.email ? `<a href="mailto:${c.email}" style="color:var(--blue);text-decoration:none;">${c.email}</a>` : '—'}</td>
       <td><a href="https://wa.me/55${(c.fone || '').replace(/\D/g,'')}" target="_blank" style="color:var(--green);text-decoration:none;">${c.fone || '—'}</a></td>
       <td><span class="badge badge-amber">${c.tipo}</span></td>
       <td>${cv.length}</td>
@@ -2455,28 +2502,41 @@ function calcularTotalPedido() {
 
 function enviarPedidoOnline() {
   const nome = document.getElementById('pedido-nome').value.trim();
+  const emailRaw = document.getElementById('pedido-email').value;
   const fone = document.getElementById('pedido-fone').value.trim();
   const produto = document.getElementById('pedido-produto').value;
   const qtd = +document.getElementById('pedido-qtd').value;
   const preco = +document.getElementById('pedido-preco').value;
   const data = document.getElementById('pedido-data').value;
   const obs = document.getElementById('pedido-obs').value.trim();
+
+  const validacaoEmail = validarEmail(emailRaw);
+  if (!validacaoEmail.ok) {
+    alert(validacaoEmail.msg);
+    return;
+  }
+  const email = validacaoEmail.email;
   
   if (!nome || !fone || !produto || !qtd || !preco || !data) {
     alert('Preencha todos os campos!');
     return;
   }
   
-  let cliente = dados.clientes.find(c => c.nome.toLowerCase() === nome.toLowerCase());
+  let cliente = dados.clientes.find(c => normalizarEmail(c.email) === email) ||
+    dados.clientes.find(c => c.nome.toLowerCase() === nome.toLowerCase());
   if (!cliente) {
     cliente = {
       id: 'C' + String(dados.clientes.length + 1).padStart(3, '0'),
       nome: nome,
+      email: email,
       fone: fone,
       tipo: 'Online',
       obs: 'Cliente web'
     };
     dados.clientes.push(cliente);
+  } else {
+    cliente.email = email;
+    if (!cliente.fone && fone) cliente.fone = fone;
   }
   
   const pedido = {
@@ -2502,6 +2562,7 @@ function enviarPedidoOnline() {
   .then(() => {
     alert('✓ Pedido recebido!\n\nID: ' + pedido.id + '\n\nVocê receberá confirmação por WhatsApp em breve.\n\nObrigado!');
     document.getElementById('pedido-nome').value = '';
+    document.getElementById('pedido-email').value = '';
     document.getElementById('pedido-fone').value = '';
     document.getElementById('pedido-qtd').value = 1;
     calcularTotalPedido();
@@ -2551,6 +2612,10 @@ function mostrarInterfacePedidos() {
                 <div class="form-group">
                   <label class="form-label">Seu Nome</label>
                   <input class="form-input" type="text" id="pedido-nome" placeholder="Seu nome completo">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">E-mail</label>
+                  <input class="form-input" type="email" id="pedido-email" placeholder="cliente@gmail.com">
                 </div>
                 <div class="form-group">
                   <label class="form-label">WhatsApp</label>
