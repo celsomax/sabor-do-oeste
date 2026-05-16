@@ -1,0 +1,543 @@
+{
+  "ok": true,
+  "result": {
+    "lotes": [
+      {
+        "id": "L001",
+        "produto": "linguica",
+        "data": "2026-05-09",
+        "kg": 11.5,
+        "precoCarne": 17.9,
+        "pesoUn": 180,
+        "precoVenda": 12.5,
+        "obs": "LOTE INICIAL",
+        "custo": 240.59,
+        "unidades": 63,
+        "status": "ativo"
+      }
+    ],
+    "vendas": [
+      {
+        "id": "V0001",
+        "loteId": "L001",
+        "clienteId": "C002",
+        "clienteNome": "Elvis",
+        "produto": "linguica",
+        "qtd": 2,
+        "preco": 12.5,
+        "total": 25,
+        "custo": 7.637777777777778,
+        "lucro": 17.362222222222222,
+        "data": "2026-05-09",
+        "local": "WhatsApp",
+        "pag": "Fiado",
+        "obs": ""
+      },
+      {
+        "id": "V0002",
+        "loteId": "L001",
+        "clienteId": "C001",
+        "clienteNome": "DIDI",
+        "produto": "linguica",
+        "qtd": 3,
+        "preco": 10,
+        "total": 30,
+        "custo": 11.456666666666667,
+        "lucro": 18.543333333333333,
+        "data": "2026-05-09",
+        "local": "WhatsApp",
+        "pag": "Fiado",
+        "obs": ""
+      },
+      {
+        "id": "V0003",
+        "loteId": "L001",
+        "clienteId": "C003",
+        "clienteNome": "Alcimar e Jussara Salame Cliente Sanga",
+        "produto": "linguica",
+        "qtd": 2,
+        "preco": 12.5,
+        "total": 25,
+        "custo": 7.637777777777778,
+        "lucro": 17.362222222222222,
+        "data": "2026-05-09",
+        "local": "WhatsApp",
+        "pag": "Pix",
+        "obs": ""
+      },
+      {
+        "id": "V0004",
+        "loteId": "L001",
+        "clienteId": "C004",
+        "clienteNome": "Carlos Richard PY",
+        "produto": "linguica",
+        "qtd": 1,
+        "preco": 50,
+        "total": 50,
+        "custo": 3.818888888888889,
+        "lucro": 46.18111111111111,
+        "data": "2026-05-09",
+        "local": "WhatsApp",
+        "pag": "Pix",
+        "obs": ""
+      },
+      {
+        "id": "V0005",
+        "loteId": "L001",
+        "clienteId": "C005",
+        "clienteNome": "Casa da rotatória, dono",
+        "produto": "linguica",
+        "qtd": 1,
+        "preco": 12.5,
+        "total": 12.5,
+        "custo": 3.818888888888889,
+        "lucro": 8.681111111111111,
+        "data": "2026-05-09",
+        "local": "WhatsApp",
+        "pag": "Pix",
+        "obs": ""
+      },
+      {
+        "id": "V0006",
+        "loteId": "L001",
+        "clienteId": "C006",
+        "clienteNome": "Miguel barbeiro",
+        "produto": "linguica",
+        "qtd": 2,
+        "preco": 12.5,
+        "total": 25,
+        "custo": 7.637777777777778,
+        "lucro": 17.362222222222222,
+        "data": "2026-05-09",
+        "local": "WhatsApp",
+        "pag": "Fiado",
+        "obs": ""
+      },
+      {
+        "id": "V0007",
+        "loteId": "L001",
+        "clienteId": "C007",
+        "clienteNome": "José do alho linha",
+        "produto": "linguica",
+        "qtd": 2,
+        "preco": 12.5,
+        "total": 25,
+        "custo": 7.637777777777778,
+        "lucro": 17.362222222222222,
+        "data": "2026-05-09",
+        "local": "WhatsApp",
+        "pag": "Fiado",
+        "obs": ""
+      },
+      {
+        "id": "V0008",
+        "loteId": "L001",
+        "clienteId": "C008",
+        "clienteNome": "Pastor Ian Paixão",
+        "produto": "linguica",
+        "qtd": 3,
+        "preco": 12.5,
+        "total": 37.5,
+        "custo": 11.456666666666667,
+        "lucro": 26.043333333333333,
+        "data": "2026-05-10",
+        "local": "WhatsApp",
+        "pag": "Pix",
+        "obs": ""
+      },
+      {
+        "id": "V0009",
+        "loteId": "L001",
+        "clienteId": "C009",
+        "clienteNome": "João Batista - Hebron",
+        "produto": "linguica",
+        "qtd": 3,
+        "preco": 12.5,
+        "total": 37.5,
+        "custo": 11.456666666666667,
+        "lucro": 26.043333333333333,
+        "data": "2026-05-10",
+        "local": "WhatsApp",
+        "pag": "Pix",
+        "obs": ""
+      },
+      {
+        "id": "V0010",
+        "loteId": "L001",
+        "clienteId": "C010",
+        "clienteNome": "Sogra - Alexandre Hebron",
+        "produto": "linguica",
+        "qtd": 1,
+        "preco": 12.5,
+        "total": 12.5,
+        "custo": 3.818888888888889,
+        "lucro": 8.681111111111111,
+        "data": "2026-05-10",
+        "local": "WhatsApp",
+        "pag": "Pix",
+        "obs": ""
+      },
+      {
+        "id": "V0011",
+        "loteId": "L001",
+        "clienteId": "C011",
+        "clienteNome": "Edson",
+        "produto": "linguica",
+        "qtd": 1,
+        "preco": 12.5,
+        "total": 12.5,
+        "custo": 3.818888888888889,
+        "lucro": 8.681111111111111,
+        "data": "2026-05-12",
+        "local": "WhatsApp",
+        "pag": "Pix",
+        "obs": ""
+      },
+      {
+        "id": "V0012",
+        "loteId": "L001",
+        "clienteId": "C012",
+        "clienteNome": "Paulo Biblioteca IFMS",
+        "produto": "linguica",
+        "qtd": 2,
+        "preco": 12.5,
+        "total": 25,
+        "custo": 7.637777777777778,
+        "lucro": 17.362222222222222,
+        "data": "2026-05-12",
+        "local": "WhatsApp",
+        "pag": "Pix",
+        "obs": ""
+      },
+      {
+        "id": "V0013",
+        "loteId": "L001",
+        "clienteId": "C013",
+        "clienteNome": "Ricardinho IFMS",
+        "produto": "linguica",
+        "qtd": 1,
+        "preco": 12.5,
+        "total": 12.5,
+        "custo": 3.818888888888889,
+        "lucro": 8.681111111111111,
+        "data": "2026-05-12",
+        "local": "WhatsApp",
+        "pag": "Pix",
+        "obs": ""
+      },
+      {
+        "id": "V0014",
+        "loteId": "L001",
+        "clienteId": "C014",
+        "clienteNome": "Lucilene Zeladora IFMS",
+        "produto": "linguica",
+        "qtd": 2,
+        "preco": 12.5,
+        "total": 25,
+        "custo": 7.637777777777778,
+        "lucro": 17.362222222222222,
+        "data": "2026-05-12",
+        "local": "WhatsApp",
+        "pag": "Pix",
+        "obs": ""
+      },
+      {
+        "id": "V0015",
+        "loteId": "L001",
+        "clienteId": "C015",
+        "clienteNome": "Vitor Alexandre  Matos COMAT IFMS",
+        "produto": "linguica",
+        "qtd": 1,
+        "preco": 12.5,
+        "total": 12.5,
+        "custo": 3.818888888888889,
+        "lucro": 8.681111111111111,
+        "data": "2026-05-12",
+        "local": "WhatsApp",
+        "pag": "Pix",
+        "obs": ""
+      },
+      {
+        "id": "V0016",
+        "loteId": "L001",
+        "clienteId": "C016",
+        "clienteNome": "Edison Sousa",
+        "produto": "linguica",
+        "qtd": 2,
+        "preco": 12.5,
+        "total": 25,
+        "custo": 7.637777777777778,
+        "lucro": 17.362222222222222,
+        "data": "2026-05-12",
+        "local": "WhatsApp",
+        "pag": "Pix",
+        "obs": ""
+      },
+      {
+        "id": "V0017",
+        "loteId": "L001",
+        "clienteId": "C017",
+        "clienteNome": "Fabio Junio IFMS",
+        "produto": "linguica",
+        "qtd": 1,
+        "preco": 12.5,
+        "total": 12.5,
+        "custo": 3.818888888888889,
+        "lucro": 8.681111111111111,
+        "data": "2026-05-12",
+        "local": "WhatsApp",
+        "pag": "Pix",
+        "obs": ""
+      },
+      {
+        "id": "V0018",
+        "loteId": "L001",
+        "clienteId": "C018",
+        "clienteNome": "Gabriel IFMS COMAT",
+        "produto": "linguica",
+        "qtd": 1,
+        "preco": 12.5,
+        "total": 12.5,
+        "custo": 3.818888888888889,
+        "lucro": 8.681111111111111,
+        "data": "2026-05-12",
+        "local": "WhatsApp",
+        "pag": "Pix",
+        "obs": ""
+      },
+      {
+        "id": "V0019",
+        "loteId": "L001",
+        "clienteId": "C019",
+        "clienteNome": "Eder IFMS",
+        "produto": "linguica",
+        "qtd": 1,
+        "preco": 12.5,
+        "total": 12.5,
+        "custo": 3.818888888888889,
+        "lucro": 8.681111111111111,
+        "data": "2026-05-12",
+        "local": "WhatsApp",
+        "pag": "Pix",
+        "obs": ""
+      },
+      {
+        "id": "V0020",
+        "loteId": "L001",
+        "clienteId": "C020",
+        "clienteNome": "Iranilda IFMS",
+        "produto": "linguica",
+        "qtd": 3,
+        "preco": 10,
+        "total": 30,
+        "custo": 11.456666666666667,
+        "lucro": 18.543333333333333,
+        "data": "2026-05-12",
+        "local": "WhatsApp",
+        "pag": "Pix",
+        "obs": ""
+      },
+      {
+        "id": "V0021",
+        "loteId": "L001",
+        "clienteId": "avulso",
+        "clienteNome": "Avulso",
+        "produto": "linguica",
+        "qtd": 1,
+        "preco": 15,
+        "total": 15,
+        "custo": 3.818888888888889,
+        "lucro": 11.181111111111111,
+        "data": "2026-05-12",
+        "local": "WhatsApp",
+        "pag": "Pix",
+        "obs": ""
+      }
+    ],
+    "clientes": [
+      {
+        "id": "C001",
+        "nome": "DIDI",
+        "fone": "+55 67 9839-0126",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C002",
+        "nome": "Elvis",
+        "fone": "",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C003",
+        "nome": "Alcimar e Jussara Salame Cliente Sanga",
+        "fone": "+55 67 9664-3638",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C004",
+        "nome": "Carlos Richard PY",
+        "fone": "+595 975 297515",
+        "tipo": "Particular",
+        "obs": "Conheci no Richard Py"
+      },
+      {
+        "id": "C005",
+        "nome": "Casa da rotatória, dono",
+        "fone": "",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C006",
+        "nome": "Miguel barbeiro",
+        "fone": "+55 67 9300-3334",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C007",
+        "nome": "José do alho linha",
+        "fone": "",
+        "tipo": "PJC",
+        "obs": ""
+      },
+      {
+        "id": "C008",
+        "nome": "Pastor Ian Paixão",
+        "fone": "+55 67 9167-4022",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C009",
+        "nome": "João Batista - Hebron",
+        "fone": "",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C010",
+        "nome": "Sogra - Alexandre Hebron",
+        "fone": "",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C011",
+        "nome": "Edson",
+        "fone": "67 9 92789990",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C012",
+        "nome": "Paulo Biblioteca IFMS",
+        "fone": "67 9115-3080",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C013",
+        "nome": "Ricardinho IFMS",
+        "fone": "67 9105-6025",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C014",
+        "nome": "Lucilene Zeladora IFMS",
+        "fone": "",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C015",
+        "nome": "Vitor Alexandre  Matos COMAT IFMS",
+        "fone": "67 9692-2825",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C016",
+        "nome": "Edison Sousa",
+        "fone": "67 9278-9990",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C017",
+        "nome": "Fabio Junio IFMS",
+        "fone": "+55 67 9860-9671",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C018",
+        "nome": "Gabriel IFMS COMAT",
+        "fone": "+55 67 9812-1471",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C019",
+        "nome": "Eder IFMS",
+        "fone": "+55 67 9691-7446",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C020",
+        "nome": "Iranilda IFMS",
+        "fone": "",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C021",
+        "nome": "Laudicéia IFMS",
+        "fone": "+55 67 9986-3321",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C022",
+        "nome": "Talia zeladora",
+        "fone": "",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C023",
+        "nome": "Erika",
+        "fone": "6798589862",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C024",
+        "nome": "Miriam zeladora",
+        "fone": "67 991932291",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C025",
+        "nome": "Jovem mercado",
+        "fone": "",
+        "tipo": "Particular",
+        "obs": ""
+      },
+      {
+        "id": "C026",
+        "nome": "Dona Rose",
+        "fone": "",
+        "tipo": "Particular",
+        "obs": ""
+      }
+    ],
+    "updatedAt": "2026-05-16T00:49:40.138Z"
+  }
+}
