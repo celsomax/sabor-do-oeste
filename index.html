@@ -525,6 +525,25 @@ tbody td:first-child { color: var(--text); }
 </head>
 <body>
 
+<!-- ===== MODAL LOGIN ===== -->
+<div id="modal-login" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:32px;max-width:380px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="font-size:32px;margin-bottom:12px;">🔐</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:800;color:var(--gold2);margin-bottom:4px;">Acesso Restrito</div>
+      <div style="font-size:12px;color:var(--text3);font-family:'DM Mono',monospace;">Sabor do Oeste · Gestão</div>
+    </div>
+    <div style="background:var(--bg3);border-radius:var(--radius);padding:16px;margin-bottom:16px;border:1px solid var(--border2);">
+      <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.1em;">Usuário</div>
+      <input type="text" id="login-usuario" placeholder="Nome do usuário" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:'Lora',serif;font-size:14px;outline:none;margin-bottom:12px;">
+      <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.1em;">Chave de Acesso</div>
+      <input type="password" id="login-chave" placeholder="••••" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:'DM Mono',monospace;font-size:14px;outline:none;">
+    </div>
+    <button onclick="fazerLogin()" style="width:100%;padding:12px;background:var(--green);color:#04281a;border:none;border-radius:999px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;cursor:pointer;">📍 Fazer Login</button>
+    <div style="text-align:center;font-size:10px;color:var(--text3);margin-top:12px;font-family:'DM Mono',monospace;">Contato: celso@sabordo-oeste.com</div>
+  </div>
+</div>
+
 <header class="header">
   <div class="logo">
     <div class="logo-icon">🥩</div>
@@ -539,6 +558,11 @@ tbody td:first-child { color: var(--text); }
       <option value="italia-claro">Italia Claro</option>
     </select>
     <div class="header-data" id="header-data"></div>
+    <button id="btn-usuario" style="background:var(--gold3);color:var(--gold);border:1px solid var(--border);border-radius:999px;padding:6px 12px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;display:none;" onclick="toggleMenuUsuario()"></button>
+    <div id="menu-usuario" style="position:absolute;top:60px;right:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:8px;display:none;z-index:200;min-width:180px;box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+      <button onclick="abrirGerenciamentoUsuarios()" style="width:100%;padding:8px 12px;text-align:left;background:transparent;border:none;color:var(--text2);font-family:'Lora',serif;font-size:12px;cursor:pointer;border-radius:var(--radius);border-bottom:1px solid var(--border2);">👥 Gerenciar Usuários</button>
+      <button onclick="fazerLogout()" style="width:100%;padding:8px 12px;text-align:left;background:transparent;border:none;color:var(--red);font-family:'Lora',serif;font-size:12px;cursor:pointer;border-radius:var(--radius);">🚪 Sair</button>
+    </div>
   </div>
 </header>
 
@@ -547,9 +571,10 @@ tbody td:first-child { color: var(--text); }
   <button class="nav-btn" onclick="irPara('lotes', this)">🏭 Lotes</button>
   <button class="nav-btn" onclick="irPara('vendas', this)">💰 Vendas</button>
   <button class="nav-btn" onclick="irPara('fiados', this)">🤝 Fiados</button>
+  <button class="nav-btn" onclick="irPara('pedidos', this)">📦 Pedidos Online</button>
   <button class="nav-btn" onclick="irPara('clientes', this)">👥 Clientes</button>
   <button class="nav-btn" onclick="irPara('relatorio', this)">📈 Relatório</button>
-  <button class="nav-btn" onclick="irPara('estoque', this)">📦 Estoque</button>
+  <button class="nav-btn" onclick="irPara('estoque', this)">📊 Estoque</button>
 </nav>
 
 <main class="main">
@@ -768,6 +793,10 @@ tbody td:first-child { color: var(--text); }
             <label class="form-label">Observação</label>
             <input class="form-input" type="text" id="v-obs" placeholder="Opcional...">
           </div>
+          <div class="form-group">
+            <label class="form-label">Vendedor</label>
+            <input class="form-input" type="text" id="v-vendedor" placeholder="Automaticamente preenchido" disabled style="background:var(--bg3);opacity:0.8;">
+          </div>
         </div>
         <div id="v-total" style="margin-bottom:12px;"></div>
         <button class="btn btn-green" onclick="adicionarVenda()">+ Registrar Venda</button>
@@ -789,6 +818,7 @@ tbody td:first-child { color: var(--text); }
                 <th>Data</th>
                 <th>Produto / Lote</th>
                 <th>Cliente</th>
+                <th>Vendedor</th>
                 <th>Local</th>
                 <th>Qtd</th>
                 <th>Unit.</th>
@@ -814,6 +844,32 @@ tbody td:first-child { color: var(--text); }
       <div class="secao-body">
         <div id="fiados-lista" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;"></div>
         <div id="fiados-vazio" class="vazio" style="grid-column:1/-1;display:block;">Nenhum fiado pendente.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PEDIDOS ONLINE ===== -->
+  <div id="pedidos" class="pagina">
+    <div class="secao" style="margin-bottom:16px;">
+      <div class="secao-header">
+        <span class="secao-titulo">Link de Pedidos para Clientes</span>
+      </div>
+      <div class="secao-body">
+        <div style="background:var(--green2);border:1px solid rgba(93,170,122,0.3);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;">
+          <div style="font-size:11px;color:var(--green);font-family:'DM Mono',monospace;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em;">Compartilhe com clientes</div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);word-break:break-all;margin-bottom:6px;" id="link-pedidos-display"></div>
+          <button onclick="copiarLinkPedidos()" class="btn btn-ghost" style="font-size:10px;padding:6px 10px;">📋 Copiar Link</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="secao">
+      <div class="secao-header">
+        <span class="secao-titulo">Pedidos Pendentes</span>
+      </div>
+      <div class="secao-body">
+        <div id="pedidos-lista" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;"></div>
+        <div id="pedidos-vazio" class="vazio" style="grid-column:1/-1;display:block;">Nenhum pedido pendente.</div>
       </div>
     </div>
   </div>
@@ -936,19 +992,102 @@ tbody td:first-child { color: var(--text); }
 
 <script>
 // ========== DADOS ==========
-let dados = JSON.parse(localStorage.getItem('salame_dados') || '{"lotes":[],"vendas":[],"clientes":[]}');
+let dados = JSON.parse(localStorage.getItem('salame_dados') || '{"lotes":[],"vendas":[],"clientes":[],"pedidos":[]}');
 const API_BASE_STORAGE_KEY = 'salame_api_base_url';
 const AUTO_SYNC_ENABLED_KEY = 'salame_auto_sync_enabled';
 const THEME_STORAGE_KEY = 'salame_theme';
 const META_STORAGE_KEY = 'salame_meta';
+const USUARIOS_STORAGE_KEY = 'salame_usuarios';
+const USUARIO_LOGADO_STORAGE_KEY = 'salame_usuario_logado';
 const AUTO_SYNC_INTERVAL_MS = 60000;
 let autoSyncTimer = null;
 let autoSyncInFlight = false;
 let autoSyncBootstrapped = false;
 let metaSync = JSON.parse(localStorage.getItem(META_STORAGE_KEY) || '{"localUpdatedAt":null,"lastCloudUpdatedAt":null}');
 
+// ===== USUARIOS =====
+let usuarios = JSON.parse(localStorage.getItem(USUARIOS_STORAGE_KEY) || '[]');
+if (usuarios.length === 0) {
+  usuarios = [
+    { id: 'U001', nome: 'Celso', chave: '1234', ativo: true }
+  ];
+  localStorage.setItem(USUARIOS_STORAGE_KEY, JSON.stringify(usuarios));
+}
+let usuarioLogado = JSON.parse(localStorage.getItem(USUARIO_LOGADO_STORAGE_KEY) || 'null');
+
 function salvarMetaSync() {
   localStorage.setItem(META_STORAGE_KEY, JSON.stringify(metaSync));
+}
+
+// ===== LOGIN / AUTENTICACAO =====
+function verificarLogin() {
+  if (!usuarioLogado) {
+    document.getElementById('modal-login').style.display = 'flex';
+    document.querySelector('nav').style.display = 'none';
+    document.querySelector('main').style.display = 'none';
+  } else {
+    document.getElementById('modal-login').style.display = 'none';
+    document.querySelector('nav').style.display = 'flex';
+    document.querySelector('main').style.display = 'block';
+    atualizarHeaderUsuario();
+  }
+}
+
+function fazerLogin() {
+  const nomeInput = document.getElementById('login-usuario').value.trim();
+  const chaveInput = document.getElementById('login-chave').value.trim();
+  
+  if (!nomeInput || !chaveInput) return alert('Preencha usuário e chave!');
+  
+  const usuario = usuarios.find(u => u.nome.toLowerCase() === nomeInput.toLowerCase() && u.chave === chaveInput);
+  if (!usuario) return alert('Usuário ou chave inválida!');
+  
+  usuarioLogado = usuario;
+  localStorage.setItem(USUARIO_LOGADO_STORAGE_KEY, JSON.stringify(usuarioLogado));
+  
+  document.getElementById('login-usuario').value = '';
+  document.getElementById('login-chave').value = '';
+  
+  verificarLogin();
+  renderAll();
+  sincronizarAutomaticamenteSilencioso();
+}
+
+function fazerLogout() {
+  if (!confirm('Tem certeza que deseja sair?')) return;
+  usuarioLogado = null;
+  localStorage.removeItem(USUARIO_LOGADO_STORAGE_KEY);
+  verificarLogin();
+}
+
+function atualizarHeaderUsuario() {
+  if (!usuarioLogado) return;
+  const btnUsuario = document.getElementById('btn-usuario');
+  btnUsuario.textContent = `👤 ${usuarioLogado.nome}`;
+  btnUsuario.style.display = 'block';
+}
+
+function toggleMenuUsuario() {
+  const menu = document.getElementById('menu-usuario');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+function abrirGerenciamentoUsuarios() {
+  const nomes = usuarios.map(u => u.nome).join(', ');
+  const novo = prompt('Nomes de usuários (separados por vírgula):', nomes);
+  if (novo === null) return;
+  
+  const nomesList = novo.split(',').map(n => n.trim()).filter(n => n);
+  usuarios = nomesList.map((nome, i) => ({
+    id: 'U' + String(i + 1).padStart(3, '0'),
+    nome: nome,
+    chave: Math.random().toString(36).substr(2, 4).toUpperCase(),
+    ativo: true
+  }));
+  
+  localStorage.setItem(USUARIOS_STORAGE_KEY, JSON.stringify(usuarios));
+  document.getElementById('menu-usuario').style.display = 'none';
+  alert(`✓ Usuários atualizados!\n\nChaves geradas:\n${usuarios.map(u => `${u.nome}: ${u.chave}`).join('\n')}`);
 }
 
 function toTs(value) {
@@ -1423,6 +1562,10 @@ function adicionarVenda() {
   const dataPrevistaPagto = pag === 'Fiado' ? document.getElementById('v-data-prevista-pgto').value : null;
   const statusPagto = pag === 'Fiado' ? document.getElementById('v-status-pgto').value : 'pago';
   
+  // Vendedor
+  const vendedorId = usuarioLogado?.id || 'desconhecido';
+  const vendedorNome = usuarioLogado?.nome || 'Desconhecido';
+  
   if (!loteId) return alert('Selecione um lote!');
   if (!qtd || qtd < 1) return alert('Informe a quantidade!');
   const lote = dados.lotes.find(l => l.id === loteId);
@@ -1438,7 +1581,7 @@ function adicionarVenda() {
     id: 'V' + String(dados.vendas.length + 1).padStart(4, '0'),
     loteId, clienteId, clienteNome: cliente ? cliente.nome : 'Avulso',
     produto: lote.produto, qtd, preco, total, custo, lucro, data, local, pag, obs,
-    dataPrevistaPagto, statusPagto
+    dataPrevistaPagto, statusPagto, vendedorId, vendedorNome
   });
   salvar();
   // Verificar se lote esgotou
@@ -1805,14 +1948,171 @@ function fecharLoteManualmente(loteId) {
   alert('✓ Lote encerrado!');
 }
 
+// ===== PEDIDOS ONLINE =====
+function gerarLinkPedidos() {
+  const baseUrl = window.location.origin + window.location.pathname;
+  return baseUrl + '?pedidos=1';
+}
+
+function renderPedidosOnline() {
+  const pedidos = Array.isArray(dados.pedidos) ? dados.pedidos.filter(p => p.status === 'pendente') : [];
+  const container = document.getElementById('pedidos-lista');
+  const vazio = document.getElementById('pedidos-vazio');
+  
+  // Mostrar link
+  const linkDisplay = document.getElementById('link-pedidos-display');
+  if (linkDisplay) {
+    linkDisplay.textContent = gerarLinkPedidos();
+  }
+  
+  if (pedidos.length === 0) {
+    container.innerHTML = '';
+    vazio.style.display = 'block';
+    return;
+  }
+  
+  vazio.style.display = 'none';
+  container.innerHTML = pedidos.map(p => {
+    const cliente = dados.clientes.find(c => c.id === p.clienteId);
+    return `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:14px;position:relative;">
+        <div style="margin-bottom:8px;">
+          <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:16px;color:var(--text);">${cliente?.nome || 'Cliente'}</div>
+          <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">${p.id} · ${formatData(p.data)}</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:var(--radius);padding:10px;margin-bottom:10px;border:1px solid var(--border2);">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span style="color:var(--text2);font-size:12px;">Produto:</span>
+            <span style="color:var(--text);font-family:'DM Mono',monospace;">${p.produto}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span style="color:var(--text2);font-size:12px;">Quantidade:</span>
+            <span style="color:var(--text);font-family:'DM Mono',monospace;font-weight:600;">${p.qtd} un</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="color:var(--text2);font-size:12px;">Total estimado:</span>
+            <span style="color:var(--green);font-family:'DM Mono',monospace;font-weight:600;">${moeda(p.totalEstimado)}</span>
+          </div>
+          ${p.obs ? `<div style="margin-top:6px;font-size:11px;color:var(--text3);padding-top:6px;border-top:1px solid var(--border2);">Obs: ${p.obs}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-green btn-sm" onclick="entregarPedido('${p.id}')" style="flex:1;">✓ Entregar</button>
+          <button class="btn btn-danger btn-sm" onclick="recusarPedido('${p.id}')">✕</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function copiarLinkPedidos() {
+  const link = gerarLinkPedidos();
+  navigator.clipboard.writeText(link).then(() => {
+    alert('✓ Link copiado para a área de transferência!');
+  });
+}
+
+function entregarPedido(pedidoId) {
+  const pedido = dados.pedidos?.find(p => p.id === pedidoId);
+  if (!pedido) return alert('Pedido não encontrado.');
+  
+  const cliente = dados.clientes.find(c => c.id === pedido.clienteId);
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:5000;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:24px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:var(--gold2);margin-bottom:4px;">📦 Entregar Pedido</div>
+      <div style="font-size:12px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:16px;letter-spacing:0.1em;text-transform:uppercase;">${pedido.id} · ${cliente?.nome || 'Cliente'}</div>
+      <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:12px;margin-bottom:16px;">
+        <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;text-transform:uppercase;margin-bottom:6px;letter-spacing:0.08em;">Resumo do Pedido</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="color:var(--text2);">Produto:</span>
+          <span style="color:var(--text);font-weight:600;">${pedido.produto} × ${pedido.qtd} un</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:var(--text2);">Total:</span>
+          <span style="color:var(--green);font-weight:600;">${moeda(pedido.totalEstimado)}</span>
+        </div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;display:block;margin-bottom:6px;">Forma de Pagamento</label>
+        <select id="entrega-pgto" style="width:100%;padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:'Lora',serif;font-size:13px;outline:none;">
+          <option value="Pix">Pix</option>
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="Fiado">Fiado</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="confirmarEntrega('${pedidoId}')" class="btn btn-green" style="flex:1;padding:12px;border-radius:999px;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;">✓ Confirmar Entrega</button>
+        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="btn btn-ghost" style="flex:1;padding:12px;border-radius:999px;border:1px solid var(--border);background:var(--bg3);cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;color:var(--text2);">Cancelar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+function confirmarEntrega(pedidoId) {
+  const pedido = dados.pedidos?.find(p => p.id === pedidoId);
+  if (!pedido) return;
+  
+  const pgto = document.getElementById('entrega-pgto')?.value || 'Pix';
+  const cliente = dados.clientes.find(c => c.id === pedido.clienteId);
+  
+  // Criar venda a partir do pedido
+  dados.vendas.push({
+    id: 'V' + String(dados.vendas.length + 1).padStart(4, '0'),
+    loteId: 'ONLINE',
+    clienteId: pedido.clienteId,
+    clienteNome: cliente?.nome || 'Online',
+    produto: pedido.produto,
+    qtd: pedido.qtd,
+    preco: pedido.totalEstimado / pedido.qtd,
+    total: pedido.totalEstimado,
+    custo: 0,
+    lucro: pedido.totalEstimado,
+    data: pedido.data,
+    local: 'Online',
+    pag: pgto,
+    obs: `Pedido online: ${pedido.id}`,
+    dataPrevistaPagto: pgto === 'Fiado' ? pedido.dataPrevistaPagto : null,
+    statusPagto: pgto === 'Fiado' ? 'pendente' : 'pago',
+    vendedorId: usuarioLogado?.id || 'desconhecido',
+    vendedorNome: usuarioLogado?.nome || 'Sistema'
+  });
+  
+  // Marcar pedido como atendido
+  pedido.status = 'atendido';
+  
+  salvar();
+  renderAll();
+  document.querySelector('[onclick*="entregarPedido"]')?.parentElement?.parentElement?.remove();
+  alert(`✓ Pedido ${pedido.id} entregue!\nVenda registrada com ${pgto}`);
+}
+
+function recusarPedido(pedidoId) {
+  if (!confirm('Descartar este pedido?')) return;
+  dados.pedidos = dados.pedidos?.filter(p => p.id !== pedidoId) || [];
+  salvar();
+  renderAll();
+  alert('✓ Pedido descartado');
+}
+
 // ===== RENDER ALL =====
 function renderAll() {
+  if (!usuarioLogado) return; // Evitar render sem login
+  
   popularSelectLotes();
   popularSelectClientes();
+  
+  // Atualizar campo de vendedor
+  if (document.getElementById('v-vendedor')) {
+    document.getElementById('v-vendedor').value = usuarioLogado?.nome || 'Desconhecido';
+  }
+  
   renderDashboard();
   renderTabLotes();
   renderTabVendas();
   renderFiadosPendentes();
+  renderPedidosOnline();
   renderTabClientes();
   renderRelatorio();
   renderEstoque();
@@ -1969,6 +2269,7 @@ function renderTabVendas() {
     <td>${formatData(v.data)}</td>
     <td><span class="badge badge-gold">${v.loteId}</span> ${v.produto === 'salame' ? 'Salame' : 'Linguiça'}</td>
     <td>${v.clienteNome}</td>
+    <td><span class="badge badge-amber">${v.vendedorNome || 'Desconhecido'}</span></td>
     <td><span class="badge badge-blue">${v.local}</span></td>
     <td>${v.qtd}</td>
     <td>${moeda(v.preco)}</td>
@@ -2120,7 +2421,169 @@ function renderEstoque() {
 }
 
 // Inicializar
-renderAll();
+inicializarTema();
+
+// Verificar se é interface de pedidos
+const params = new URLSearchParams(window.location.search);
+if (params.get('pedidos') === '1') {
+  mostrarInterfacePedidos();
+} else {
+  verificarLogin();
+}
+
+function mostrarInterfacePedidos() {
+  // Carregar dados da nuvem para ter produtos disponíveis
+  fetch(getApiUrl('/api/sync/export-cloud'))
+    .then(r => r.json())
+    .then(payload => {
+      if (payload.ok) {
+        dados = {
+          lotes: payload.result?.lotes || [],
+          vendas: payload.result?.vendas || [],
+          clientes: payload.result?.clientes || [],
+          pedidos: payload.result?.pedidos || []
+        };
+      }
+    })
+    .catch(() => {})
+    .finally(() => {
+      // Mostrar interface de pedidos
+      document.querySelector('nav').style.display = 'none';
+      document.querySelector('main').style.display = 'none';
+      document.querySelector('.header').style.display = 'flex';
+      document.body.innerHTML = `
+        <header class="header" style="display:flex;">
+          <div class="logo">
+            <div class="logo-icon">🥩</div>
+            <div>
+              <span class="logo-texto">Sabor do Oeste</span>
+              <span class="logo-sub">Faça seu Pedido</span>
+            </div>
+          </div>
+        </header>
+        <main class="main" style="display:block;">
+          <div class="secao" style="max-width:600px;margin:40px auto;">
+            <div class="secao-header">
+              <span class="secao-titulo">🛍️ Pedido Online</span>
+            </div>
+            <div class="secao-body">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Seu Nome</label>
+                  <input class="form-input" type="text" id="pedido-nome" placeholder="Seu nome completo">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">WhatsApp</label>
+                  <input class="form-input" type="text" id="pedido-fone" placeholder="(67) 9 9999-9999">
+                </div>
+                <div class="form-group" style="grid-column:1/-1;">
+                  <label class="form-label">Produto</label>
+                  <select class="form-select" id="pedido-produto">
+                    <option value="">Selecione um produto...</option>
+                    <option value="Salame Artesanal">🥩 Salame Artesanal</option>
+                    <option value="Linguiça Artesanal">🌭 Linguiça Artesanal</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Quantidade (unidades)</label>
+                  <input class="form-input" type="number" id="pedido-qtd" value="1" min="1">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Preço Unitário (R$)</label>
+                  <input class="form-input" type="number" id="pedido-preco" value="12.50" step="0.50">
+                </div>
+                <div class="form-group" style="grid-column:1/-1;">
+                  <label class="form-label">Data de Entrega Prevista</label>
+                  <input class="form-input" type="date" id="pedido-data">
+                </div>
+                <div class="form-group" style="grid-column:1/-1;">
+                  <label class="form-label">Observações</label>
+                  <input class="form-input" type="text" id="pedido-obs" placeholder="Ex: sem alho, com tempero extra...">
+                </div>
+              </div>
+              <div id="pedido-total" style="background:var(--green2);border:1px solid rgba(93,170,122,0.3);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--green);">
+                Total: <strong style="font-size:16px;" id="pedido-total-valor">R$ 12,50</strong>
+              </div>
+              <button onclick="enviarPedidoOnline()" class="btn btn-green" style="width:100%;padding:14px;border-radius:999px;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;">✓ Enviar Pedido</button>
+              <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px;font-family:'DM Mono',monospace;">Você receberá confirmação por WhatsApp</div>
+            </div>
+          </div>
+        </main>
+        <script>
+          document.getElementById('pedido-qtd').addEventListener('change', calcularTotalPedido);
+          document.getElementById('pedido-preco').addEventListener('change', calcularTotalPedido);
+          
+          function calcularTotalPedido() {
+            const qtd = +document.getElementById('pedido-qtd').value || 1;
+            const preco = +document.getElementById('pedido-preco').value || 0;
+            const total = qtd * preco;
+            document.getElementById('pedido-total-valor').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+          }
+          
+          function enviarPedidoOnline() {
+            const nome = document.getElementById('pedido-nome').value.trim();
+            const fone = document.getElementById('pedido-fone').value.trim();
+            const produto = document.getElementById('pedido-produto').value;
+            const qtd = +document.getElementById('pedido-qtd').value;
+            const preco = +document.getElementById('pedido-preco').value;
+            const data = document.getElementById('pedido-data').value;
+            const obs = document.getElementById('pedido-obs').value.trim();
+            
+            if (!nome || !fone || !produto || !qtd || !preco || !data) {
+              alert('Preencha todos os campos!');
+              return;
+            }
+            
+            // Criar ou atualizar cliente
+            let cliente = dados.clientes.find(c => c.nome.toLowerCase() === nome.toLowerCase());
+            if (!cliente) {
+              cliente = {
+                id: 'C' + String(dados.clientes.length + 1).padStart(3, '0'),
+                nome: nome,
+                fone: fone,
+                tipo: 'Online',
+                obs: 'Cliente web'
+              };
+              dados.clientes.push(cliente);
+            }
+            
+            // Criar pedido
+            const pedido = {
+              id: 'PED' + Date.now().toString().slice(-6),
+              clienteId: cliente.id,
+              produto: produto,
+              qtd: qtd,
+              totalEstimado: qtd * preco,
+              data: new Date().toISOString().split('T')[0],
+              dataPrevistaPagto: data,
+              obs: obs,
+              status: 'pendente'
+            };
+            
+            if (!Array.isArray(dados.pedidos)) dados.pedidos = [];
+            dados.pedidos.push(pedido);
+            
+            // Sincronizar com nuvem
+            fetch('${getApiUrl('/api/sync/import-local')}', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ dados })
+            })
+            .then(() => {
+              alert('✓ Pedido recebido!\\n\\nID: ' + pedido.id + '\\n\\nVocê receberá confirmação por WhatsApp em breve.\\n\\nObrigado!');
+              document.getElementById('pedido-nome').value = '';
+              document.getElementById('pedido-fone').value = '';
+              document.getElementById('pedido-qtd').value = 1;
+              calcularTotalPedido();
+            })
+            .catch(() => {
+              alert('Erro ao enviar pedido. Tente novamente.');
+            });
+          }
+        </script>
+      `;
+    });
+}
 </script>
 </body>
 </html>
