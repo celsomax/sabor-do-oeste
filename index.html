@@ -2446,6 +2446,72 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+// ===== FUNCOES PEDIDOS ONLINE =====
+function calcularTotalPedido() {
+  const qtd = +document.getElementById('pedido-qtd').value || 1;
+  const preco = +document.getElementById('pedido-preco').value || 0;
+  const total = qtd * preco;
+  document.getElementById('pedido-total-valor').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+}
+
+function enviarPedidoOnline() {
+  const nome = document.getElementById('pedido-nome').value.trim();
+  const fone = document.getElementById('pedido-fone').value.trim();
+  const produto = document.getElementById('pedido-produto').value;
+  const qtd = +document.getElementById('pedido-qtd').value;
+  const preco = +document.getElementById('pedido-preco').value;
+  const data = document.getElementById('pedido-data').value;
+  const obs = document.getElementById('pedido-obs').value.trim();
+  
+  if (!nome || !fone || !produto || !qtd || !preco || !data) {
+    alert('Preencha todos os campos!');
+    return;
+  }
+  
+  let cliente = dados.clientes.find(c => c.nome.toLowerCase() === nome.toLowerCase());
+  if (!cliente) {
+    cliente = {
+      id: 'C' + String(dados.clientes.length + 1).padStart(3, '0'),
+      nome: nome,
+      fone: fone,
+      tipo: 'Online',
+      obs: 'Cliente web'
+    };
+    dados.clientes.push(cliente);
+  }
+  
+  const pedido = {
+    id: 'PED' + Date.now().toString().slice(-6),
+    clienteId: cliente.id,
+    produto: produto,
+    qtd: qtd,
+    totalEstimado: qtd * preco,
+    data: new Date().toISOString().split('T')[0],
+    dataPrevistaPagto: data,
+    obs: obs,
+    status: 'pendente'
+  };
+  
+  if (!Array.isArray(dados.pedidos)) dados.pedidos = [];
+  dados.pedidos.push(pedido);
+  
+  fetch(getApiUrl('/api/sync/import-local'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ dados })
+  })
+  .then(() => {
+    alert('✓ Pedido recebido!\n\nID: ' + pedido.id + '\n\nVocê receberá confirmação por WhatsApp em breve.\n\nObrigado!');
+    document.getElementById('pedido-nome').value = '';
+    document.getElementById('pedido-fone').value = '';
+    document.getElementById('pedido-qtd').value = 1;
+    calcularTotalPedido();
+  })
+  .catch(() => {
+    alert('Erro ao enviar pedido. Tente novamente.');
+  });
+}
+
 function mostrarInterfacePedidos() {
   // Carregar dados da nuvem para ter produtos disponíveis
   fetch(getApiUrl('/api/sync/export-cloud'))
@@ -2519,84 +2585,23 @@ function mostrarInterfacePedidos() {
               <div id="pedido-total" style="background:var(--green2);border:1px solid rgba(93,170,122,0.3);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--green);">
                 Total: <strong style="font-size:16px;" id="pedido-total-valor">R$ 12,50</strong>
               </div>
-              <button onclick="enviarPedidoOnline()" class="btn btn-green" style="width:100%;padding:14px;border-radius:999px;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;">✓ Enviar Pedido</button>
+              <button id="btn-enviar-pedido" class="btn btn-green" style="width:100%;padding:14px;border-radius:999px;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;">✓ Enviar Pedido</button>
               <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px;font-family:'DM Mono',monospace;">Você receberá confirmação por WhatsApp</div>
             </div>
           </div>
         </main>
-        <script>
-          document.getElementById('pedido-qtd').addEventListener('change', calcularTotalPedido);
-          document.getElementById('pedido-preco').addEventListener('change', calcularTotalPedido);
-          
-          function calcularTotalPedido() {
-            const qtd = +document.getElementById('pedido-qtd').value || 1;
-            const preco = +document.getElementById('pedido-preco').value || 0;
-            const total = qtd * preco;
-            document.getElementById('pedido-total-valor').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
-          }
-          
-          function enviarPedidoOnline() {
-            const nome = document.getElementById('pedido-nome').value.trim();
-            const fone = document.getElementById('pedido-fone').value.trim();
-            const produto = document.getElementById('pedido-produto').value;
-            const qtd = +document.getElementById('pedido-qtd').value;
-            const preco = +document.getElementById('pedido-preco').value;
-            const data = document.getElementById('pedido-data').value;
-            const obs = document.getElementById('pedido-obs').value.trim();
-            
-            if (!nome || !fone || !produto || !qtd || !preco || !data) {
-              alert('Preencha todos os campos!');
-              return;
-            }
-            
-            // Criar ou atualizar cliente
-            let cliente = dados.clientes.find(c => c.nome.toLowerCase() === nome.toLowerCase());
-            if (!cliente) {
-              cliente = {
-                id: 'C' + String(dados.clientes.length + 1).padStart(3, '0'),
-                nome: nome,
-                fone: fone,
-                tipo: 'Online',
-                obs: 'Cliente web'
-              };
-              dados.clientes.push(cliente);
-            }
-            
-            // Criar pedido
-            const pedido = {
-              id: 'PED' + Date.now().toString().slice(-6),
-              clienteId: cliente.id,
-              produto: produto,
-              qtd: qtd,
-              totalEstimado: qtd * preco,
-              data: new Date().toISOString().split('T')[0],
-              dataPrevistaPagto: data,
-              obs: obs,
-              status: 'pendente'
-            };
-            
-            if (!Array.isArray(dados.pedidos)) dados.pedidos = [];
-            dados.pedidos.push(pedido);
-            
-            // Sincronizar com nuvem
-            fetch('${getApiUrl('/api/sync/import-local')}', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ dados })
-            })
-            .then(() => {
-              alert('✓ Pedido recebido!\\n\\nID: ' + pedido.id + '\\n\\nVocê receberá confirmação por WhatsApp em breve.\\n\\nObrigado!');
-              document.getElementById('pedido-nome').value = '';
-              document.getElementById('pedido-fone').value = '';
-              document.getElementById('pedido-qtd').value = 1;
-              calcularTotalPedido();
-            })
-            .catch(() => {
-              alert('Erro ao enviar pedido. Tente novamente.');
-            });
-          }
-        </script>
       `;
+      
+      // Adicionar event listeners após injetar HTML
+      setTimeout(() => {
+        const qtdInput = document.getElementById('pedido-qtd');
+        const precoInput = document.getElementById('pedido-preco');
+        const btnEnviar = document.getElementById('btn-enviar-pedido');
+        
+        if (qtdInput) qtdInput.addEventListener('change', calcularTotalPedido);
+        if (precoInput) precoInput.addEventListener('change', calcularTotalPedido);
+        if (btnEnviar) btnEnviar.addEventListener('click', enviarPedidoOnline);
+      }, 100);
     });
 }
 </script>
