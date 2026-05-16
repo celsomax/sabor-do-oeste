@@ -721,8 +721,8 @@ tbody td:first-child { color: var(--text); }
                 <span id="l-receita-tripa" style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--text);">6,0 m</span>
               </div>
               <div class="form-group" style="margin:0;">
-                <label class="form-label" style="font-size:10px;">Preço da tripa (R$/m)</label>
-                <input class="form-input" type="number" id="l-preco-tripa" value="40" step="1" style="font-size:12px;padding:6px 8px;">
+                <label class="form-label" style="font-size:10px;">Preço da tripa (R$/metro)</label>
+                <input class="form-input" type="number" id="l-preco-tripa" value="4" step="0.5" style="font-size:12px;padding:6px 8px;">
               </div>
             </div>
 
@@ -1499,7 +1499,7 @@ function calcularReceita(kg) {
   };
 }
 
-function custoPorLote(kg, precoCarne, precoTempero = 25, precoAcucar = 5, precoAlho = 20, precoTripa = 40) {
+function custoPorLote(kg, precoCarne, precoTempero = 25, precoAcucar = 5, precoAlho = 20, precoTripa = 4) {
   const rec = calcularReceita(kg);
   const carne   = kg * precoCarne;
   const tempero = (rec.temperoG / 1000) * precoTempero;
@@ -1606,7 +1606,7 @@ function atualizarPreviewLote() {
   const precoTemp    = +document.getElementById('l-preco-tempero').value || 25;
   const precoAcucar  = +document.getElementById('l-preco-acucar').value || 5;
   const precoAlho    = +document.getElementById('l-preco-alho').value || 20;
-  const precoTripa   = +document.getElementById('l-preco-tripa').value || 40;
+  const precoTripa   = +document.getElementById('l-preco-tripa').value || 4;
   const peso         = +document.getElementById('l-peso-un').value || 180;
   const precoVenda   = +document.getElementById('l-preco-venda').value || 12.5;
 
@@ -1693,7 +1693,7 @@ function adicionarLote() {
   const precoTempero = +document.getElementById('l-preco-tempero').value || 25;
   const precoAcucar  = +document.getElementById('l-preco-acucar').value || 5;
   const precoAlho    = +document.getElementById('l-preco-alho').value || 20;
-  const precoTripa   = +document.getElementById('l-preco-tripa').value || 40;
+  const precoTripa   = +document.getElementById('l-preco-tripa').value || 4;
   const pesoUn       = +document.getElementById('l-peso-un').value;
   const precoVenda   = +document.getElementById('l-preco-venda').value;
   const obs          = document.getElementById('l-obs').value;
