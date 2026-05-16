@@ -652,7 +652,6 @@ tbody td:first-child { color: var(--text); }
           <div class="form-group">
             <label class="form-label">Produto</label>
             <select class="form-select" id="l-produto">
-              <option value="salame">Salame Artesanal</option>
               <option value="linguica">Linguiça Artesanal</option>
             </select>
           </div>
@@ -1737,11 +1736,7 @@ function editarLote(id) {
   const data = prompt('Data do lote (AAAA-MM-DD)', lote.data || hoje());
   if (data === null) return;
 
-  const produtoRaw = prompt('Produto (salame ou linguica)', lote.produto || 'salame');
-  if (produtoRaw === null) return;
-  const produtoNormalizado = produtoRaw.trim().toLowerCase();
-  const produto = produtoNormalizado === 'linguica' ? 'linguica' : produtoNormalizado === 'salame' ? 'salame' : null;
-  if (!produto) return alert('Produto invalido. Use salame ou linguica.');
+  const produto = 'linguica'; // Apenas Linguiça permitida
 
   const vendidas = dados.vendas.filter(v => v.loteId === lote.id).reduce((a, v) => a + v.qtd, 0);
   const unidadesRaw = prompt('Unidades produzidas no lote', String(lote.unidades || 0));
@@ -1828,7 +1823,7 @@ function popularSelectLotes() {
   dados.lotes.filter(l => l.status === 'ativo').forEach(l => {
     const vendidas = dados.vendas.filter(v => v.loteId === l.id).reduce((a, v) => a + v.qtd, 0);
     const est = l.unidades - vendidas;
-    sel.innerHTML += `<option value="${l.id}">${l.id} · ${l.produto === 'salame' ? 'Salame' : 'Linguiça'} · ${est} un · ${formatData(l.data)}</option>`;
+    sel.innerHTML += `<option value="${l.id}">${l.id} · Linguiça · ${est} un · ${formatData(l.data)}</option>`;
   });
   if (val) sel.value = val;
 }
@@ -2184,7 +2179,7 @@ function renderDashboard() {
     <div class="lista-item">
       <div>
         <div class="li-nome">${v.clienteNome} · ${v.local}</div>
-        <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">${formatData(v.data)} · ${v.qtd}un · ${v.produto === 'salame' ? 'Salame' : 'Linguiça'}</div>
+        <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">${formatData(v.data)} · ${v.qtd}un · Linguiça</div>
       </div>
       <div class="li-valor">${moeda(v.total)}</div>
     </div>`).join('') : '<div class="vazio">Sem vendas ainda.</div>';
@@ -2197,7 +2192,7 @@ function renderDashboard() {
     const pct = l.unidades > 0 ? (v / l.unidades * 100).toFixed(0) : 0;
     return `<div class="lista-item">
       <div>
-        <div class="li-nome">${l.id} · ${l.produto === 'salame' ? 'Salame' : 'Linguiça'}</div>
+        <div class="li-nome">${l.id} · Linguiça</div>
         <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">${formatData(l.data)} · ${est} un restantes (${pct}% vendido)</div>
       </div>
       <span class="badge badge-verde">${est} un</span>
@@ -2240,8 +2235,7 @@ function renderTabLotes() {
     const est = l.unidades - vendidas;
     return `<tr>
       <td><span class="badge badge-gold">${l.id}</span></td>
-      <td>${l.produto === 'salame' ? '🥩 Salame' : '🌭 Linguiça'}</td>
-      <td>${formatData(l.data)}</td>
+      <td><span class="badge badge-gold">🌭 Linguiça</span></td>
       <td>${l.unidades}</td>
       <td>${vendidas}</td>
       <td><span class="badge ${est > 0 ? 'badge-verde' : 'badge-red'}">${est}</span></td>
@@ -2267,7 +2261,7 @@ function renderTabVendas() {
   document.getElementById('vazio-vendas').style.display = lista.length ? 'none' : 'block';
   tbody.innerHTML = [...lista].reverse().map(v => `<tr>
     <td>${formatData(v.data)}</td>
-    <td><span class="badge badge-gold">${v.loteId}</span> ${v.produto === 'salame' ? 'Salame' : 'Linguiça'}</td>
+    <td><span class="badge badge-gold">${v.loteId}</span> Linguiça</td>
     <td>${v.clienteNome}</td>
     <td><span class="badge badge-amber">${v.vendedorNome || 'Desconhecido'}</span></td>
     <td><span class="badge badge-blue">${v.local}</span></td>
@@ -2354,14 +2348,13 @@ function renderRelatorio() {
       <div class="li-valor">${moeda(d.total)}</div>
     </div>`).join('') : '<div class="vazio">Sem dados.</div>';
 
-  // Por produto
-  const prods = { salame: { total:0, lucro:0, qtd:0 }, linguica: { total:0, lucro:0, qtd:0 } };
+  // Por produto - apenas Linguiça
+  const prods = { linguica: { total:0, lucro:0, qtd:0 } };
   dados.vendas.forEach(v => {
-    const p = v.produto === 'salame' ? 'salame' : 'linguica';
-    prods[p].total += v.total; prods[p].lucro += v.lucro; prods[p].qtd += v.qtd;
+    prods.linguica.total += v.total; prods.linguica.lucro += v.lucro; prods.linguica.qtd += v.qtd;
   });
   document.getElementById('rel-produto').innerHTML = `
-    <div class="lista-item"><div><div class="li-nome">🥩 Salame Artesanal</div><div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">${prods.salame.qtd} unidades</div></div><div class="li-valor">${moeda(prods.salame.total)}</div></div>
+    <div class="lista-item"><div><div class="li-nome">🌭 Linguiça Artesanal</div><div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">${prods.linguica.qtd} unidades</div></div><div class="li-valor">${moeda(prods.linguica.total)}</div></div>
     <div class="lista-item"><div><div class="li-nome">🌭 Linguiça Artesanal</div><div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;">${prods.linguica.qtd} unidades</div></div><div class="li-valor">${moeda(prods.linguica.total)}</div></div>
   `;
 
@@ -2403,7 +2396,7 @@ function renderEstoque() {
     const potencial = est * l.precoVenda;
     return `<tr>
       <td><span class="badge badge-gold">${l.id}</span></td>
-      <td>${l.produto === 'salame' ? '🥩 Salame' : '🌭 Linguiça'}</td>
+      <td>🌭 Linguiça</td>
       <td>${l.unidades}</td>
       <td>${v}</td>
       <td><span class="badge ${est > 5 ? 'badge-verde' : est > 0 ? 'badge-amber' : 'badge-red'}">${est}</span></td>
@@ -2560,9 +2553,7 @@ function mostrarInterfacePedidos() {
                 <div class="form-group" style="grid-column:1/-1;">
                   <label class="form-label">Produto</label>
                   <select class="form-select" id="pedido-produto">
-                    <option value="">Selecione um produto...</option>
-                    <option value="Salame Artesanal">🥩 Salame Artesanal</option>
-                    <option value="Linguiça Artesanal">🌭 Linguiça Artesanal</option>
+                    <option value="Linguiça Artesanal" selected>🌭 Linguiça Artesanal</option>
                   </select>
                 </div>
                 <div class="form-group">
