@@ -1158,7 +1158,8 @@ function totalRegistros(snapshot) {
   const lotes = Array.isArray(snapshot?.lotes) ? snapshot.lotes.length : 0;
   const vendas = Array.isArray(snapshot?.vendas) ? snapshot.vendas.length : 0;
   const clientes = Array.isArray(snapshot?.clientes) ? snapshot.clientes.length : 0;
-  return lotes + vendas + clientes;
+  const pedidos = Array.isArray(snapshot?.pedidos) ? snapshot.pedidos.length : 0;
+  return lotes + vendas + clientes + pedidos;
 }
 
 function mergeArraysById(localArr, cloudArr) {
@@ -1187,7 +1188,8 @@ function mergeSnapshots(localSnapshot, cloudSnapshot, prefer = 'cloud') {
   return {
     lotes: mergeArraysById(first?.lotes || [], second?.lotes || []),
     vendas: mergeArraysById(first?.vendas || [], second?.vendas || []),
-    clientes: mergeArraysById(first?.clientes || [], second?.clientes || [])
+    clientes: mergeArraysById(first?.clientes || [], second?.clientes || []),
+    pedidos: mergeArraysById(first?.pedidos || [], second?.pedidos || [])
   };
 }
 
@@ -1228,7 +1230,7 @@ async function sincronizarParaNuvemInterno({ silent = false, allowEmptyOverwrite
       throw new Error(payload.error || 'Falha na sincronizacao.');
     }
     if (!silent) {
-      setIaStatus(`Sincronizacao concluida!\nLotes: ${payload.result.lotes}\nVendas: ${payload.result.vendas}\nClientes: ${payload.result.clientes}\nAtualizado em: ${payload.result.updatedAt}`, 'ok');
+      setIaStatus(`Sincronizacao concluida!\nLotes: ${payload.result.lotes}\nVendas: ${payload.result.vendas}\nClientes: ${payload.result.clientes}\nPedidos: ${payload.result.pedidos ?? 0}\nAtualizado em: ${payload.result.updatedAt}`, 'ok');
     }
 
     metaSync.lastCloudUpdatedAt = payload?.result?.updatedAt || new Date().toISOString();
@@ -1264,7 +1266,8 @@ async function carregarDaNuvemInterno({ silent = false } = {}) {
     dados = {
       lotes: Array.isArray(snapshot.lotes) ? snapshot.lotes : [],
       vendas: Array.isArray(snapshot.vendas) ? snapshot.vendas : [],
-      clientes: Array.isArray(snapshot.clientes) ? snapshot.clientes : []
+      clientes: Array.isArray(snapshot.clientes) ? snapshot.clientes : [],
+      pedidos: Array.isArray(snapshot.pedidos) ? snapshot.pedidos : []
     };
 
     salvar();
@@ -1273,7 +1276,7 @@ async function carregarDaNuvemInterno({ silent = false } = {}) {
 
     if (!silent) {
       setIaStatus(
-        `Dados carregados da nuvem com sucesso!\nLotes: ${dados.lotes.length}\nVendas: ${dados.vendas.length}\nClientes: ${dados.clientes.length}\nAtualizado em: ${snapshot.updatedAt || '—'}`,
+        `Dados carregados da nuvem com sucesso!\nLotes: ${dados.lotes.length}\nVendas: ${dados.vendas.length}\nClientes: ${dados.clientes.length}\nPedidos: ${dados.pedidos.length}\nAtualizado em: ${snapshot.updatedAt || '—'}`,
         'ok'
       );
     }
@@ -1311,11 +1314,12 @@ async function sincronizarAutomaticamenteSilencioso() {
     const cloudPayload = await cloudResp.json();
     if (!cloudResp.ok || !cloudPayload.ok) return;
 
-    const cloud = cloudPayload.result || { lotes: [], vendas: [], clientes: [] };
+    const cloud = cloudPayload.result || { lotes: [], vendas: [], clientes: [], pedidos: [] };
     const local = {
       lotes: Array.isArray(dados?.lotes) ? dados.lotes : [],
       vendas: Array.isArray(dados?.vendas) ? dados.vendas : [],
-      clientes: Array.isArray(dados?.clientes) ? dados.clientes : []
+      clientes: Array.isArray(dados?.clientes) ? dados.clientes : [],
+      pedidos: Array.isArray(dados?.pedidos) ? dados.pedidos : []
     };
 
     const cloudTs = toTs(cloud?.updatedAt);
@@ -1325,14 +1329,16 @@ async function sincronizarAutomaticamenteSilencioso() {
       ? {
           lotes: Array.isArray(cloud.lotes) ? cloud.lotes : [],
           vendas: Array.isArray(cloud.vendas) ? cloud.vendas : [],
-          clientes: Array.isArray(cloud.clientes) ? cloud.clientes : []
+          clientes: Array.isArray(cloud.clientes) ? cloud.clientes : [],
+          pedidos: Array.isArray(cloud.pedidos) ? cloud.pedidos : []
         }
       : mergeSnapshots(local, cloud, 'local');
     const localStr = JSON.stringify(local);
     const cloudStr = JSON.stringify({
       lotes: Array.isArray(cloud.lotes) ? cloud.lotes : [],
       vendas: Array.isArray(cloud.vendas) ? cloud.vendas : [],
-      clientes: Array.isArray(cloud.clientes) ? cloud.clientes : []
+      clientes: Array.isArray(cloud.clientes) ? cloud.clientes : [],
+      pedidos: Array.isArray(cloud.pedidos) ? cloud.pedidos : []
     });
     const mergedStr = JSON.stringify(merged);
 
